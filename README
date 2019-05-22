@@ -1,0 +1,12 @@
+Wykorzystane naglowki:
+- CMSIS DSP
+- CMSIS Core (CMSIS 5 z gita https://github.com/ARM-software/CMSIS_5)
+- LibMCU
+- Lib_EaBase Board	(z programow przykladowych ze strony przedmiotu)
+- katalog inc (pliki pochodza z Lib_CMSISv1p30_LPC17xx z programow przykladowych ze strony przedmiotu)
+
+Wokorzystywane biblioteki
+- CMSIS DSP, 'arm_cortexM3l_math' (CMSIS 5 z gita https://github.com/ARM-software/CMSIS_5)
+- LibMCU
+- Lib_EaBase Board
+- Lib_CMSISv1p30_LPC17xx (z programow przykladowych ze strony przedmiotu)
