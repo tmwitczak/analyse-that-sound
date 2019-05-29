@@ -81,8 +81,7 @@ void intToString(int value, uint8_t* pBuf, uint32_t len, uint32_t base)
 volatile int iterator = 0;
 volatile int value = 0;
 
-volatile int maxADCValue = 0;
-volatile int minADCValue = 4095;
+volatile int frequency = 500;
 
 
 // BUFFER
@@ -123,6 +122,8 @@ void TIMER1_IRQHandler(void)
 
 
 volatile int x = 0;
+volatile int adcIterator = 0;
+
 void ADC_IRQHandler()
 {
 	uint32_t data = ADC_ChannelGetData(LPC_ADC, 0);
@@ -134,17 +135,14 @@ void ADC_IRQHandler()
 		currentSample = sampleBuffer;
 	}
 
-	//x ^= 1;
-	//DAC_UpdateValue(LPC_DAC, x * 1023);
-	DAC_UpdateValue(LPC_DAC, data * 1024 / 4096);
-	value = data;
-
-	// Find max and min value measured by ADC
-	if (data > maxADCValue)
-		maxADCValue = data;
-
-	if (data < minADCValue)
-		minADCValue = data;
+	//------------------------------------------ Speaker frequency
+	int step = SAMPLE_RATE / (2 * frequency);
+	adcIterator = (adcIterator + 1) % step;
+	if(adcIterator == 0){
+		DAC_UpdateValue(LPC_DAC, x * 1023 / 2);
+		x ^= 1;
+	}
+	//------------------------------------------
 
 	uint32_t unused = LPC_ADC->ADGDR;	//clear interrupt flag!!!!!
 }
@@ -362,16 +360,10 @@ int main(void) {
 		}
 
 
-		int frequency = SAMPLE_RATE * maxIndex / FFT_POINTS_NUMBER;
+		frequency = SAMPLE_RATE * maxIndex / FFT_POINTS_NUMBER;
 
-    	//oled_putString(45,1, buf, OLED_COLOR_BLACK, OLED_COLOR_BLACK);
-    	intToString(frequency, buf, 10, 10);
-    	//oled_fillRect(45,1, 85, 9, OLED_COLOR_BLACK);
-		oled_putString(45,1, buf, OLED_COLOR_WHITE, OLED_COLOR_BLACK);
-
-		/*intToString(maxADCValue, buf, 10, 10);
-		oled_fillRect(45,9, 75, 18, OLED_COLOR_BLACK);
-		oled_putString(45,9, buf, OLED_COLOR_WHITE, OLED_COLOR_BLACK);*/
+    	//intToString(frequency, buf, 10, 10);
+		//oled_putString(45,1, buf, OLED_COLOR_WHITE, OLED_COLOR_BLACK);
     }
 
     return 0;
