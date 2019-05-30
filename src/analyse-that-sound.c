@@ -3,19 +3,14 @@
 #include <lpc17xx_clkpwr.h>
 #include <lpc17xx_adc.h>
 #include <lpc17xx_dac.h>
-#include <oled.h>
 #include <lpc17xx_pinsel.h>
 #include <lpc17xx_ssp.h>
 #include <lpc17xx_i2c.h>
+#include <oled.h>
 
 
 #include "arm_math.h"
 #include "arm_const_structs.h"
-
-
-//#include <stdint.h>
-//#include <cr_section_macros.h>
-//#include <rgb.h>
 
 void intToString(int value, uint8_t* pBuf, uint32_t len, uint32_t base)
 {
@@ -85,15 +80,49 @@ volatile int frequency = 500;
 
 
 // BUFFER
-#define FFT_POINTS_NUMBER 512
+#define FFT_POINTS_NUMBER 256
 volatile int16_t sampleBuffer[FFT_POINTS_NUMBER];
 volatile int16_t* currentSample = sampleBuffer;
 
 volatile float32_t fft_buffer[FFT_POINTS_NUMBER * 2];
 volatile float32_t amplitude[FFT_POINTS_NUMBER];
 
+#define SCREEN_WIDTH 	OLED_DISPLAY_WIDTH
+#define SCREEN_HEIGHT	OLED_DISPLAY_HEIGHT
+volatile uint8_t normalizedAmplitude[SCREEN_WIDTH];
+volatile float32_t globalAmplitudeMax;
+volatile uint16_t localAmplitudeMaxIndex = 1;
+
 #define SAMPLE_RATE 8000
 
+void normalizeAmplitudes() {
+	float32_t sum = 0;
+	for (int i = 0;
+		 i < FFT_POINTS_NUMBER / 2;
+		 ++i)
+	{
+		sum += amplitude[i];
+		if (i != 0 && i % (FFT_POINTS_NUMBER / 2 / SCREEN_WIDTH) == 0) {
+			sum /= (FFT_POINTS_NUMBER / 2 / SCREEN_WIDTH);
+			normalizedAmplitude[i / (FFT_POINTS_NUMBER / 2 / SCREEN_WIDTH)]
+					= sum / globalAmplitudeMax * SCREEN_HEIGHT;
+			sum = 0;
+		}
+	}
+}
+
+void findLocalAndGlobalMaxAmplitudes() {
+	// Find local max amplitude for one FFT computation
+	for(int i = 2; i < FFT_POINTS_NUMBER / 2; i++) {
+		if(amplitude[i] > amplitude[localAmplitudeMaxIndex]) {
+			localAmplitudeMaxIndex = i;
+		}
+	}
+	// Save global maximum value for further normalization
+	if(amplitude[localAmplitudeMaxIndex] > globalAmplitudeMax) {
+		globalAmplitudeMax = amplitude[localAmplitudeMaxIndex];
+	}
+}
 
 void fillFftBuffer() {
 	uint16_t *sample = currentSample;
@@ -139,7 +168,7 @@ void ADC_IRQHandler()
 	int step = SAMPLE_RATE / (2 * frequency);
 	adcIterator = (adcIterator + 1) % step;
 	if(adcIterator == 0){
-		DAC_UpdateValue(LPC_DAC, x * 1023 / 2);
+		DAC_UpdateValue(LPC_DAC, x * 1023 / 4);
 		x ^= 1;
 	}
 	//------------------------------------------
@@ -248,6 +277,47 @@ void configureAndStartDAC() {
 	CLKPWR_SetPCLKDiv(CLKPWR_PCLKSEL_DAC, CLKPWR_PCLKSEL_CCLK_DIV_4);
 }
 
+/*void configureAndStartSPI() {
+	// Turn on power
+	CLKPWR_ConfigPPWR(CLKPWR_PCONP_PCSPI, ENABLE);
+
+	// Select clock divisor
+	CLKPWR_SetPCLKDiv(CLKPWR_PCLKSEL_SPI, CLKPWR_PCLKSEL_CCLK_DIV_1);
+
+	// In master mode this has to be even and >= 8
+	LPC_SPI->SPCCR = 8;
+
+	// Confiugre pins
+	LPC_PINCON->PINSEL0 |= (BIT(31) | BIT(30));  	// SCK
+	LPC_PINCON->PINSEL1 |= (BIT(1) | BIT(0));  		// SSEL
+	LPC_PINCON->PINSEL1 |= (BIT(3) | BIT(2));  		// MISO
+	LPC_PINCON->PINSEL1 |= (BIT(5) | BIT(4)); 		// MOSI
+
+	// Set control register
+	LPC_SPI->SPCR |= BIT(5);	// MSTR / Master mode select
+}*/
+
+void configureAndStartOLED() {
+	// J42 inserted selects SPI -> BS1 = 0 (GND)
+
+	// Set GPIO direction input
+	GPIO_SetDir(2, (1<<1), 1);	// Power
+	GPIO_SetDir(2, (1<<7), 1); 	// D/C#
+	GPIO_SetDir(0, (1<<6), 1); 	// CS#
+
+	// Turn power off
+	GPIO_ClearValue( 2, (1<<1) );
+
+	// Turn transmission off
+	OLED_CS_OFF();
+
+	// Default recommended settings
+	runInitSequenceSPI();
+
+	// Turn power on
+	GPIO_SetValue( 2, (1<<1) );
+}
+
 void configureAndStartSpeakerAmplifier() {
 	GPIO_SetDir(0, 1<<27, 1);
 	GPIO_SetDir(0, 1<<28, 1);
@@ -306,8 +376,16 @@ static void init_i2c(void)
 	I2C_Cmd(LPC_I2C2, ENABLE);
 }
 
+void writeByteToSPI(uint8_t byte) {
+	LPC_SPI->SPDR = byte;
+	while(!(LPC_SPI->SPSR & BIT(7)));
+}
+
 /////////////////////////////////////////////////////////////////////////// Main
 int main(void) {
+	init_ssp();
+	init_i2c();
+	oled_init();
 
 	// Configure peripherals
 	configureAndStartTimer0();
@@ -321,49 +399,45 @@ int main(void) {
 	NVIC->ISER[0] |= BIT(2);		// Enable timer1 interrupts
 	NVIC->ISER[0] |= BIT(22);		// Enable ADC interrupts
 
-	//configure oled and used interfaces
-	init_i2c();
-	init_ssp();
-	oled_init();
-
-	static uint8_t buf[10];
-
-	oled_clearScreen(OLED_COLOR_BLACK);
-	oled_putString(1,1, "F: ", OLED_COLOR_WHITE, OLED_COLOR_BLACK);
-	//oled_putString(1,9, "Max: ", OLED_COLOR_WHITE, OLED_COLOR_BLACK);
-
-
-	uint16_t loudness = 0;
-
-
-	//////////////////////////////////// | FFT Configuration
-
-	////////////////////////////////////////////////////////
-
     // Main loop
     while(1) {
 
     	fillFftBuffer();
 
-    	arm_cfft_f32(&arm_cfft_sR_f32_len512, fft_buffer, 0, 1);
+    	arm_cfft_f32(&arm_cfft_sR_f32_len256, fft_buffer, 0, 1);
     	arm_cmplx_mag_f32(fft_buffer, amplitude, FFT_POINTS_NUMBER);
 
-    	//fix_fftr(fft_buffer, FFT_POINTS_NUMBER, 0);
-    	//for(int i = 0; i < FFT_POINTS_NUMBER / 2; i++)
-    	//	amplitude[i] = fft_buffer[i];
+		findLocalAndGlobalMaxAmplitudes();
+		normalizeAmplitudes();
 
-		uint16_t maxIndex = 1;
-		for(int i = 2; i < FFT_POINTS_NUMBER / 2; i++) {
-			if(amplitude[i] > amplitude[maxIndex]) {
-				maxIndex = i;
+		frequency = SAMPLE_RATE * localAmplitudeMaxIndex / FFT_POINTS_NUMBER;
+
+
+		//------------------------------- OLED
+
+		for (int page = 0; page < 8; ++page) {
+			writeCommand(0xb0 + page); //page number
+			// start column = 18
+			writeCommand(0x02); //start column low 2
+			writeCommand(0x11); //start column high 1
+
+			for (int column = SCREEN_WIDTH - 1; column >= 0; --column) {
+				if (normalizedAmplitude[column] >= 8) {
+					writeData(0xff);
+					normalizedAmplitude[column] -= 8;
+				}
+				else {
+					writeData(0xff >> (8 - normalizedAmplitude[column]));
+					normalizedAmplitude[column] = 0;
+				}
 			}
 		}
 
 
-		frequency = SAMPLE_RATE * maxIndex / FFT_POINTS_NUMBER;
+		//-------------------------------
 
-    	//intToString(frequency, buf, 10, 10);
-		//oled_putString(45,1, buf, OLED_COLOR_WHITE, OLED_COLOR_BLACK);
+
+
     }
 
     return 0;
