@@ -25,13 +25,34 @@ typedef float float32_t;
 #define TRUE              1
 #define FALSE             0
 
-#define SAMPLE_RATE 	  8000
-#define FFT_POINTS_NUMBER 1024
-#define SCREEN_WIDTH 	  OLED_DISPLAY_WIDTH
-#define SCREEN_HEIGHT	  OLED_DISPLAY_HEIGHT
+#define SAMPLE_RATE 	  		8000
+#define FFT_POINTS_NUMBER 		1024
+#define SCREEN_WIDTH 	  		OLED_DISPLAY_WIDTH
+#define SCREEN_HEIGHT	  		OLED_DISPLAY_HEIGHT
+#define SINE_LOOKUP_TABLE_SIZE	128
 
 
 /* ///////////////////////////////////////////////////////// Global variables */
+uint16_t sineLookupTable[SINE_LOOKUP_TABLE_SIZE]
+        = {512, 537, 562, 587, 612, 637, 661, 685,
+        		709, 732, 755, 777, 798, 819, 838, 858,
+        		876, 893, 910, 925, 939, 953, 965, 976,
+        		986, 995, 1003, 1009, 1015, 1019, 1022, 1023,
+        		1023, 1023, 1020, 1017, 1012, 1006, 999, 991,
+        		981, 971, 959, 946, 932, 917, 901, 885,
+        		867, 848, 829, 808, 787, 766, 743, 721,
+        		697, 673, 649, 625, 600, 575, 549, 524,
+        		499, 474, 448, 423, 398, 374, 350, 326,
+        		302, 280, 257, 236, 215, 194, 175, 156,
+        		138, 122, 106, 91, 77, 64, 52, 42,
+        		32, 24, 17, 11, 6, 3, 0, 0,
+        		0, 1, 4, 8, 14, 20, 28, 37,
+        		47, 58, 70, 84, 98, 113, 130, 147,
+        		165, 185, 204, 225, 246, 268, 291, 314,
+        		338, 362, 386, 411, 436, 461, 486, 511};
+
+
+
 volatile int value 	   = 0;
 volatile int frequency = 500;
 
@@ -48,7 +69,7 @@ volatile float globalAmplitudeMax;
 volatile uint16_t localAmplitudeMaxIndex = 1;
 
 volatile int dacAmplitudeValue = 0;
-volatile int adcIterator = 0;
+volatile int dacIterator = 0;
 
 
 /* ////////////////////////////////////////////////////////////////////// FFT */
@@ -123,6 +144,16 @@ void fillFftBuffer()
 /* /////////////////////////////////////////////////////// Interrupt handlers */
 void TIMER1_IRQHandler()
 {
+	//generate pure tone using dac
+	int step = 100000 / frequency;	//na przestrzeni tylu przerwan musimy zrobic caly okres
+	int sinPhase = dacIterator * SINE_LOOKUP_TABLE_SIZE / step;
+	dacIterator = (dacIterator + 1) % step;
+
+	if(sinPhase >= SINE_LOOKUP_TABLE_SIZE)
+		sinPhase = SINE_LOOKUP_TABLE_SIZE - 1;
+
+	DAC_UpdateValue(LPC_DAC, sineLookupTable[sinPhase]);
+
     /* Clear interrupt status */
     LPC_TIM1->IR = 0xffffffff;
 }
@@ -141,16 +172,6 @@ void ADC_IRQHandler()
         currentSample = sampleBuffer;
     }
 
-    /* Play doubled frequency */
-    int step = SAMPLE_RATE / (2 * frequency);
-
-    adcIterator = (adcIterator + 1) % step;
-
-    if(adcIterator == 0)
-    {
-        DAC_UpdateValue(LPC_DAC, dacAmplitudeValue * 1023 / 4);
-        dacAmplitudeValue ^= 1;
-    }
 
     /* Clear interrupt status */
     uint32_t unused = LPC_ADC->ADGDR;
@@ -204,7 +225,7 @@ void configureAndStartTimer1()
     LPC_TIM1->PR = 0;
 
     /* Configure interrupts */
-    LPC_TIM1->MR1 = 25000000 / 10;			// When counter reaches match register value (10 Hz)
+    LPC_TIM1->MR1 = 25000000 / 100000;			// When counter reaches match register value (100 000 Hz)
     LPC_TIM1->MCR |= BIT(4);				// then reset
     LPC_TIM1->MCR |= BIT(3);				// then interrupt
 
