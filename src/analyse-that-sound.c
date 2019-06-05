@@ -148,6 +148,23 @@ void TIMER1_IRQHandler(void)
 	LPC_TIM1->IR = 0xffffffff;
 }
 
+int abc = 0;
+
+void TIMER0_IRQHandler(void)
+{
+	if(abc == 0){
+		LPC_GPIO2->FIOCLR |= BIT(0);
+		LPC_GPIO2->FIOCLR |= BIT(1);
+		LPC_GPIO0->FIOCLR |= BIT(26);
+	}else{
+		LPC_GPIO2->FIOSET |= BIT(0);
+		LPC_GPIO2->FIOSET |= BIT(1);
+		LPC_GPIO0->FIOSET |= BIT(26);
+	}
+	abc ^= 1;
+	// Clear interrupt status!!!!!
+	LPC_TIM0->IR = 0xffffffff;
+}
 
 
 volatile int x = 0;
@@ -200,12 +217,16 @@ void configureAndStartTimer0() {
 	LPC_TIM0->EMR |= BIT(6);
 
 	// Configure interrupts
-	LPC_TIM0->MR1 = 1000000 / SAMPLE_RATE / 2;		// When counter reaches match register value (8000 Hz)
+	LPC_TIM0->MR1 = 25000000; //1000000 / SAMPLE_RATE / 2;		// When counter reaches match register value (16000 Hz)
 	LPC_TIM0->MCR |= BIT(4);						// then reset
-	//LPC_TIM0->MCR |= BIT(3);						// then interrupt
+	LPC_TIM0->MCR |= BIT(3);						// then interrupt
 
 	// Start
 	LPC_TIM0->TCR |= BIT(0);
+}
+
+void configureSystemClock(){
+
 }
 
 void configureAndStartTimer1() {
@@ -381,24 +402,72 @@ void writeByteToSPI(uint8_t byte) {
 	while(!(LPC_SPI->SPSR & BIT(7)));
 }
 
+void configureSystemClock100Mhz(){
+	LPC_SC->SCS       = BIT(5);				// Enable main oscillator (30)
+	while ((LPC_SC->SCS & (1<<6)) == 0);	// Wait for Oscillator to be ready
+	LPC_SC->CCLKCFG   =	2;      			// Setup Clock Divider - 3 (57)
+	LPC_SC->PCLKSEL0  = 0;       			// Peripheral Clock Selection - 4 for every peripheral
+	LPC_SC->PCLKSEL1  = 0;
+	LPC_SC->CLKSRCSEL = 1;    				// Select Clock Source for PLL0 - Main oscillator (36)
+
+	//target frequency - 100MHz
+	//pll source - main oscillator, FIN=12MHz
+	//pll output frquency, FCCO=300MHz (must be in range 275 to 550 MHz so we are using CLKCFG = 3)
+	//using M = (FCCO * N) / (2 * FIN) we have:
+	//M=25
+	//N=2
+
+	//configure PLL0
+	uint16_t M = 25;
+	uint16_t N = 2;
+	LPC_SC->PLL0CFG   = ((N - 1) << 16) | (M - 1);
+	LPC_SC->PLL0FEED  = 0xAA;				//A correct feed sequence must be written to the PLL0FEED register
+	LPC_SC->PLL0FEED  = 0x55;				//in order for changes to the PLL0CON and PLL0CFG registers to take effect
+
+	//enable PLL0							(39)
+	LPC_SC->PLL0CON   = BIT(0);
+	LPC_SC->PLL0FEED  = 0xAA;
+	LPC_SC->PLL0FEED  = 0x55;
+	while (!(LPC_SC->PLL0STAT & (1<<26))); // Wait for PLOCK0
+
+	//PLL0 Enable & Connect					(39)
+	LPC_SC->PLL0CON   = BIT(1) | BIT(0);
+	LPC_SC->PLL0FEED  = 0xAA;
+	LPC_SC->PLL0FEED  = 0x55;
+	while (!(LPC_SC->PLL0STAT & ((1<<25) | (1<<24))));  //Wait for PLLC0_STAT & PLLE0_STAT
+}
+
 /////////////////////////////////////////////////////////////////////////// Main
 int main(void) {
-	init_ssp();
-	init_i2c();
-	oled_init();
+
+	configureSystemClock100Mhz();
+
+	LPC_GPIO2->FIODIR |= 1;
+	LPC_GPIO0->FIODIR |= (1 << 26);
+	LPC_GPIO2->FIODIR |= (1 << 1);
+	LPC_GPIO2->FIOCLR |= 1;
+	LPC_GPIO0->FIOCLR |= (1 << 26);
+	LPC_GPIO2->FIOCLR |= (1 << 1);
+
+
+	//init_ssp();
+	//init_i2c();
+	//oled_init();
 
 	// Configure peripherals
 	configureAndStartTimer0();
-	configureAndStartTimer1();
-	configureAndStartADC();
-	configureAndStartDAC();
-	configureAndStartSpeakerAmplifier();
+	//configureAndStartTimer1();
+	//configureAndStartADC();
+	//configureAndStartDAC();
+	//configureAndStartSpeakerAmplifier();
 
 	// Enable NVIC interrupts
-	NVIC->ICER[0] |= BIT(1);		// Disable timer0 interrupts
-	NVIC->ISER[0] |= BIT(2);		// Enable timer1 interrupts
-	NVIC->ISER[0] |= BIT(22);		// Enable ADC interrupts
+	NVIC->ISER[0] |= BIT(1);		// Disable timer0 interrupts
+	//NVIC->ICER[0] |= BIT(2);		// Enable timer1 interrupts
+	//NVIC->ICER[0] |= BIT(22);		// Enable ADC interrupts
 
+
+	while(1){}
     // Main loop
     while(1) {
 

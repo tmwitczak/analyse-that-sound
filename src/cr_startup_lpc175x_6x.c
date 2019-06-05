@@ -291,9 +291,9 @@ ResetISR(void) {
         bss_init(ExeAddr, SectionLen);
     }
 
-#if defined (__USE_CMSIS) || defined (__USE_LPCOPEN)
-    SystemInit();
-#endif
+//#if defined (__USE_CMSIS) || defined (__USE_LPCOPEN)
+    //SystemInit();
+//#endif
 
 #if defined (__cplusplus)
     //
