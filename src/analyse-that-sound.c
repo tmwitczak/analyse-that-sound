@@ -1,4 +1,4 @@
-/* ///////////////////////////////////////////////////////////////// Includes */
+/* \\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\ Includes */
 #include <LPC17xx.h>
 #include <lpc17xx_clkpwr.h>
 #include <lpc17xx_adc.h>
@@ -15,11 +15,11 @@
 #include "analyse-that-sound/typedefs.h"
 
 
-/* /////////////////////////////////////////////////////////////////// Macros */
-#define BIT(number) (1 << (number))
+/* \\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\ Macros */
+#define BIT(number) (((uint32_t)1) << ((uint32_t)(number)))
 
 
-/* //////////////////////////////////////////////////////////////// Constants */
+/* \\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\ Constants */
 /* -------------------------------------------------------- Boolean values -- */
 #define TRUE                    1
 #define FALSE                   0
@@ -32,7 +32,7 @@
 #define SINE_LOOKUP_TABLE_SIZE	128
 
 
-/* ///////////////////////////////////////////////////////// Global variables */
+/* \\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\ Global variables */
 /* --------------------------------------------------------- Sine function -- */
 uint16_t sineLookupTable[SINE_LOOKUP_TABLE_SIZE]
         = {  512,  537,  562,  587,  612,  637,  661,  685,
@@ -71,22 +71,21 @@ volatile uint16_t localAmplitudeMaxIndex = 1;
 volatile int      dacAmplitudeValue = 0;
 volatile int      dacIterator = 0;
 
-
-/* //////////////////////////////////////////////////////////////// Functions */
+/* \\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\ Functions */
 /* ------------------------------------------------------------------- FFT -- */
 void normalizeAmplitudes()
 {
     float sum = 0;
 
     for (int i = 1;
-         i < FFT_POINTS_NUMBER / 2;
+         i < (FFT_POINTS_NUMBER / 2);
          ++i)
     {
         sum += amplitude[i];
 
-        if (i != 0
+        if ((i != 0)
             &&
-            i % (FFT_POINTS_NUMBER / 2 / OLED_DISPLAY_WIDTH) == 0)
+            ((i % (FFT_POINTS_NUMBER / 2 / OLED_DISPLAY_WIDTH)) == 0))
         {
             sum /= (FFT_POINTS_NUMBER / 2 / OLED_DISPLAY_WIDTH);
 
@@ -102,7 +101,7 @@ void findLocalAndGlobalMaxAmplitudes()
 {
     /* Find local max amplitude for one FFT computation */
     for(int i = 1;
-        i < FFT_POINTS_NUMBER / 2;
+        i < (FFT_POINTS_NUMBER / 2);
         ++i)
     {
         if(amplitude[i] > amplitude[localAmplitudeMaxIndex])
@@ -123,7 +122,7 @@ void fillFftBuffer()
     uint16_t *sample = currentSample;
     float *fft_buffer_ptr = fft_buffer;
 
-    memset(fft_buffer, 0, sizeof(float) * FFT_POINTS_NUMBER * 2);
+    memset(fft_buffer, 0, (int)sizeof(float) * FFT_POINTS_NUMBER * 2);
 
     for(int i = 0;
         i < FFT_POINTS_NUMBER;
@@ -134,7 +133,7 @@ void fillFftBuffer()
         sample += 1;
         fft_buffer_ptr += 2;
 
-        if (sample == sampleBuffer + FFT_POINTS_NUMBER)
+        if (sample == (sampleBuffer + FFT_POINTS_NUMBER))
         {
             sample = sampleBuffer;
         }
@@ -142,7 +141,7 @@ void fillFftBuffer()
 }
 
 
-/* /////////////////////////////////////////////////////// Interrupt handlers */
+/* \\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\ Interrupt handlers */
 void TIMER1_IRQHandler()
 {
     //generate pure tone using dac
@@ -151,7 +150,9 @@ void TIMER1_IRQHandler()
     dacIterator = (dacIterator + 1) % step;
 
     if(sinPhase >= SINE_LOOKUP_TABLE_SIZE)
+    {
         sinPhase = SINE_LOOKUP_TABLE_SIZE - 1;
+    }
 
     DAC_UpdateValue(LPC_DAC, sineLookupTable[sinPhase]);
 
@@ -168,7 +169,7 @@ void ADC_IRQHandler()
     (*currentSample) = (uint16_t)adcSampledValue;
     currentSample++;
 
-    if (currentSample == sampleBuffer + FFT_POINTS_NUMBER)
+    if (currentSample == (sampleBuffer + FFT_POINTS_NUMBER))
     {
         currentSample = sampleBuffer;
     }
@@ -179,7 +180,7 @@ void ADC_IRQHandler()
 }
 
 
-/* //////////////////////////////////////////////// Peripheral configurations */
+/* \\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\ Peripheral configurations */
 void configureAndStartTimer0()
 {
     /* Turn on power */
@@ -202,7 +203,7 @@ void configureAndStartTimer0()
     /* Configure interrupts */
     LPC_TIM0->MR1 = 25000000 / SAMPLE_RATE / 2;		// When counter reaches match register value (8000 Hz)
     LPC_TIM0->MCR |= BIT(4);						// then reset
-    //LPC_TIM0->MCR |= BIT(3);						// then interrupt
+    /* LPC_TIM0->MCR |= BIT(3); */					// then interrupt
 
     /* Start */
     LPC_TIM0->TCR |= BIT(0);
@@ -282,13 +283,13 @@ void configureAndStartDAC()
 }
 
 void configureAndStartSpeakerAmplifier() {
-    GPIO_SetDir(0, 1<<27, 1);
-    GPIO_SetDir(0, 1<<28, 1);
-    GPIO_SetDir(2, 1<<13, 1);
+    GPIO_SetDir(0, BIT(27), 1);
+    GPIO_SetDir(0, BIT(28), 1);
+    GPIO_SetDir(2, BIT(13), 1);
 
-    GPIO_ClearValue(0, 1<<27);	//LM4811-clk
-    GPIO_ClearValue(0, 1<<28);	//LM4811-up/dn
-    GPIO_ClearValue(2, 1<<13);	//LM4811-shutdn
+    GPIO_ClearValue(0, BIT(27));	//LM4811-clk
+    GPIO_ClearValue(0, BIT(28));	//LM4811-up/dn
+    GPIO_ClearValue(2, BIT(13));	//LM4811-shutdn
 }
 
 static void init_ssp()
@@ -341,7 +342,7 @@ static void init_i2c()
 
 void writeByteToSPI(uint8_t byte) {
     LPC_SPI->SPDR = byte;
-    while(!(LPC_SPI->SPSR & BIT(7)));
+    while(!(LPC_SPI->SPSR & BIT(7))) {}
 }
 
 void configureBoard()
@@ -371,7 +372,7 @@ void configureInterrupts()
 
 void configureSystemClock100Mhz(){
     LPC_SC->SCS       = BIT(5);				// Enable main oscillator (30)
-    while ((LPC_SC->SCS & (1<<6)) == 0);	// Wait for Oscillator to be ready
+    while ((LPC_SC->SCS & (BIT(6))) == 0) {}	// Wait for Oscillator to be ready
     LPC_SC->CCLKCFG   =	2;      			// Setup Clock Divider - 3 (57)
     LPC_SC->PCLKSEL0  = 0;       			// Peripheral Clock Selection - 4 for every peripheral
     LPC_SC->PCLKSEL1  = 0;
@@ -385,9 +386,9 @@ void configureSystemClock100Mhz(){
     //N=2
 
     //configure PLL0
-    uint16_t M = 25;
-    uint16_t N = 2;
-    LPC_SC->PLL0CFG   = ((N - 1) << 16) | (M - 1);
+    uint16_t M = 25u;
+    uint16_t N = 2u;
+    LPC_SC->PLL0CFG = ((N - (uint16_t)1) << (uint16_t)16) | (M - (uint16_t)1);
     LPC_SC->PLL0FEED  = 0xAA;				//A correct feed sequence must be written to the PLL0FEED register
     LPC_SC->PLL0FEED  = 0x55;				//in order for changes to the PLL0CON and PLL0CFG registers to take effect
 
@@ -395,13 +396,13 @@ void configureSystemClock100Mhz(){
     LPC_SC->PLL0CON   = BIT(0);
     LPC_SC->PLL0FEED  = 0xAA;
     LPC_SC->PLL0FEED  = 0x55;
-    while (!(LPC_SC->PLL0STAT & (1<<26))); // Wait for PLOCK0
+    while (!(LPC_SC->PLL0STAT & (BIT(26)))) {} // Wait for PLOCK0
 
     //PLL0 Enable & Connect					(39)
     LPC_SC->PLL0CON   = BIT(1) | BIT(0);
     LPC_SC->PLL0FEED  = 0xAA;
     LPC_SC->PLL0FEED  = 0x55;
-    while (!(LPC_SC->PLL0STAT & ((1<<25) | (1<<24))));  //Wait for PLLC0_STAT & PLLE0_STAT
+    while (!(LPC_SC->PLL0STAT & ((BIT(25)) | (BIT(24))))) {}  //Wait for PLLC0_STAT & PLLE0_STAT
 }
 
 
@@ -424,7 +425,7 @@ void runMainProgramLoop()
         findLocalAndGlobalMaxAmplitudes();
         normalizeAmplitudes();
 
-        frequency = SAMPLE_RATE * localAmplitudeMaxIndex / FFT_POINTS_NUMBER;
+        frequency = (uint16_t)SAMPLE_RATE * localAmplitudeMaxIndex / (uint16_t)FFT_POINTS_NUMBER;
 
 
         //------------------------------- OLED
@@ -436,12 +437,12 @@ void runMainProgramLoop()
             writeCommand(0x11); //start column high 1
 
             for (int column = OLED_DISPLAY_WIDTH - 1; column >= 0; --column) {
-                if (normalizedAmplitude[column] >= 8) {
+                if (normalizedAmplitude[column] >= (uint8_t)8) {
                     writeData(0xff);
-                    normalizedAmplitude[column] -= 8;
+                    normalizedAmplitude[column] -= (uint8_t)8;
                 }
                 else {
-                    writeData(0xff >> (8 - normalizedAmplitude[column]));
+                    writeData(((uint8_t)0xff) >> ((uint8_t)8 - normalizedAmplitude[column]));
                     normalizedAmplitude[column] = 0;
                 }
             }
@@ -455,7 +456,7 @@ void runMainProgramLoop()
     }
 }
 
-/* ///////////////////////////////////////////////////////// AnalyseThatSound */
+/* \\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\ AnalyseThatSound */
 int main()
 {
     configureBoard();
@@ -465,12 +466,12 @@ int main()
 }
 
 
-/* ////////////////////////////////////////////////////////////////////////// */
+/* \\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\ */
 
 
 
 
-void intToString(int value, uint8_t* pBuf, uint32_t len, uint32_t base)
+/* void intToString(int value, uint8_t* pBuf, uint32_t len, uint32_t base)
 {
     static const char* pAscii = "0123456789abcdefghijklmnopqrstuvwxyz";
     int pos = 0;
@@ -526,3 +527,4 @@ void intToString(int value, uint8_t* pBuf, uint32_t len, uint32_t base)
     return;
 
 }
+*/
