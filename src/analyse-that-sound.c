@@ -12,9 +12,7 @@
 #include "arm_const_structs.h"
 
 
-/* ///////////////////////////////////////////////////////////////// Typedefs */
-/* IEEE 754 single-precision floating-point */
-typedef float float32_t;
+#include "analyse-that-sound/typedefs.h"
 
 
 /* /////////////////////////////////////////////////////////////////// Macros */
