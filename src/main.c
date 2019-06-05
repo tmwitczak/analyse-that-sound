@@ -13,10 +13,7 @@
 
 
 #include "analyse-that-sound/typedefs.h"
-
-
-/* \\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\ Macros */
-#define BIT(number) (((uint32_t)1) << ((uint32_t)(number)))
+#include "analyse-that-sound/macros.h"
 
 
 /* \\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\ Constants */
