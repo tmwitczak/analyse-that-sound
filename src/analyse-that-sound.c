@@ -30,10 +30,6 @@ typedef float float32_t;
 #define SAMPLE_RATE 	  		8000
 #define FFT_POINTS_NUMBER 		1024
 
-/* ------------------------------------------------ OLED screen dimensions -- */
-#define SCREEN_WIDTH 	  		OLED_DISPLAY_WIDTH
-#define SCREEN_HEIGHT	  		OLED_DISPLAY_HEIGHT
-
 /* ---------------------------------------------- Sine function parameters -- */
 #define SINE_LOOKUP_TABLE_SIZE	128
 
@@ -70,7 +66,7 @@ volatile float    fft_buffer[FFT_POINTS_NUMBER * 2];
 volatile float    amplitude[FFT_POINTS_NUMBER];
 
 
-volatile uint8_t  normalizedAmplitude[SCREEN_WIDTH];
+volatile uint8_t  normalizedAmplitude[OLED_DISPLAY_WIDTH];
 volatile float    globalAmplitudeMax;
 volatile uint16_t localAmplitudeMaxIndex = 1;
 
@@ -92,12 +88,12 @@ void normalizeAmplitudes()
 
         if (i != 0
             &&
-            i % (FFT_POINTS_NUMBER / 2 / SCREEN_WIDTH) == 0)
+            i % (FFT_POINTS_NUMBER / 2 / OLED_DISPLAY_WIDTH) == 0)
         {
-            sum /= (FFT_POINTS_NUMBER / 2 / SCREEN_WIDTH);
+            sum /= (FFT_POINTS_NUMBER / 2 / OLED_DISPLAY_WIDTH);
 
-            normalizedAmplitude[i / (FFT_POINTS_NUMBER / 2 / SCREEN_WIDTH)]
-                    = sum / globalAmplitudeMax * SCREEN_HEIGHT;
+            normalizedAmplitude[i / (FFT_POINTS_NUMBER / 2 / OLED_DISPLAY_WIDTH)]
+                    = sum / globalAmplitudeMax * OLED_DISPLAY_HEIGHT;
 
             sum = 0;
         }
@@ -441,7 +437,7 @@ void runMainProgramLoop()
             writeCommand(0x02); //start column low 2
             writeCommand(0x11); //start column high 1
 
-            for (int column = SCREEN_WIDTH - 1; column >= 0; --column) {
+            for (int column = OLED_DISPLAY_WIDTH - 1; column >= 0; --column) {
                 if (normalizedAmplitude[column] >= 8) {
                     writeData(0xff);
                     normalizedAmplitude[column] -= 8;
