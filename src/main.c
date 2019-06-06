@@ -38,7 +38,6 @@ uint16_t sineLookupTable[SINE_LOOKUP_TABLE_SIZE]
 
 
 /* ------------------------------------------------------------------- FFT -- */
-volatile int      value = 0;
 volatile int      frequency = 500;
 volatile int	  interval = 0;
 volatile int	  volume = 100;
