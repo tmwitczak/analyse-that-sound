@@ -49,56 +49,64 @@ volatile int16_t  *currentSample = sampleBuffer;
 
 volatile float    fft_buffer[FFT_POINTS_NUMBER * 2];
 volatile float    amplitude[FFT_POINTS_NUMBER];
-
+volatile float	  averagedAmplitude[OLED_DISPLAY_WIDTH];
 volatile uint8_t  normalizedAmplitude[OLED_DISPLAY_WIDTH];
-volatile float    globalAmplitudeMax;
-volatile uint16_t localAmplitudeMaxIndex = 1;
+volatile uint16_t averagedAmplitudeMaxIndex = 0;
+volatile uint16_t amplitudeMaxIndex = 0;
 
 volatile int      dacIterator = 0;
 
 /* \\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\ Functions */
 /* ------------------------------------------------------------------- FFT -- */
+void averageAmplitudes(){
+	float sum = 0;
+	int noOfAveragedPoints = (FFT_POINTS_NUMBER / 2) / OLED_DISPLAY_WIDTH +
+			((FFT_POINTS_NUMBER / 2) % OLED_DISPLAY_WIDTH != 0 ? 1 : 0);
+	int j = 0;
+	for (int i = 0;
+		 i < (FFT_POINTS_NUMBER / 2);
+		 ++i)
+	{
+		sum += amplitude[i];
+
+		if ((i != 0) && ((i % noOfAveragedPoints) == 0))
+		{
+			averagedAmplitude[j++] = sum / noOfAveragedPoints;
+			sum = 0;
+		}
+	}
+}
+
 void normalizeAmplitudes()
 {
-    float sum = 0;
-
-    for (int i = 1;
-         i < (FFT_POINTS_NUMBER / 2);
+    for (int i = 0;
+         i < OLED_DISPLAY_WIDTH;
          ++i)
     {
-        sum += amplitude[i];
-
-        if ((i != 0)
-            &&
-            ((i % (FFT_POINTS_NUMBER / 2 / OLED_DISPLAY_WIDTH)) == 0))
-        {
-            sum /= (FFT_POINTS_NUMBER / 2 / OLED_DISPLAY_WIDTH);
-
-            normalizedAmplitude[i / (FFT_POINTS_NUMBER / 2 / OLED_DISPLAY_WIDTH)]
-                    = sum / globalAmplitudeMax * OLED_DISPLAY_HEIGHT;
-
-            sum = 0;
-        }
+    	normalizedAmplitude[i] = averagedAmplitude[i] / averagedAmplitude[averagedAmplitudeMaxIndex] * OLED_DISPLAY_HEIGHT;
     }
 }
 
-void findLocalAndGlobalMaxAmplitudes()
+void findMaxAmplitudes()
 {
-    /* Find local max amplitude for one FFT computation */
-    for(int i = 1;
-        i < (FFT_POINTS_NUMBER / 2);
+	for(int i = 0;
+		i < FFT_POINTS_NUMBER / 2;
+		++i)
+	{
+		if(amplitude[i] > amplitude[amplitudeMaxIndex])
+		{
+			amplitudeMaxIndex = i;
+		}
+	}
+
+    for(int i = 0;
+        i < OLED_DISPLAY_WIDTH;
         ++i)
     {
-        if(amplitude[i] > amplitude[localAmplitudeMaxIndex])
+        if(averagedAmplitude[i] > averagedAmplitude[averagedAmplitudeMaxIndex])
         {
-            localAmplitudeMaxIndex = i;
+            averagedAmplitudeMaxIndex = i;
         }
-    }
-
-    /* Save global maximum value for further normalization */
-    if(amplitude[localAmplitudeMaxIndex] > globalAmplitudeMax)
-    {
-        globalAmplitudeMax = amplitude[localAmplitudeMaxIndex];
     }
 }
 
@@ -476,10 +484,14 @@ void runMainProgramLoop()
         arm_cfft_f32(&arm_cfft_sR_f32_len1024, fft_buffer, 0, 1);
         arm_cmplx_mag_f32(fft_buffer, amplitude, FFT_POINTS_NUMBER);
 
-        findLocalAndGlobalMaxAmplitudes();
+        //bad value :(
+        amplitude[0] = 0;
+
+        averageAmplitudes();
+        findMaxAmplitudes();
         normalizeAmplitudes();
 
-        frequency = (uint16_t)SAMPLE_RATE * localAmplitudeMaxIndex / (uint16_t)FFT_POINTS_NUMBER;
+        frequency = (uint16_t)SAMPLE_RATE * amplitudeMaxIndex / (uint16_t)FFT_POINTS_NUMBER;
 
 
         //------------------------------- OLED
