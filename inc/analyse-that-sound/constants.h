@@ -15,4 +15,8 @@
 
 /* \\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\ */
 
+enum{
+	FOURIER_GRAPH, TEXT
+};
+
 #endif /* ANALYSE_THAT_SOUND_CONSTANTS_H */

@@ -40,6 +40,9 @@ uint16_t sineLookupTable[SINE_LOOKUP_TABLE_SIZE]
 /* ------------------------------------------------------------------- FFT -- */
 volatile int      value = 0;
 volatile int      frequency = 500;
+volatile int	  currentInterval = 0;
+volatile int	  volume = 100;
+volatile int	  graphStatus = FOURIER_GRAPH;
 
 volatile int16_t  sampleBuffer[FFT_POINTS_NUMBER];
 volatile int16_t  *currentSample = sampleBuffer;
@@ -138,7 +141,7 @@ void TIMER1_IRQHandler()
         sinPhase = SINE_LOOKUP_TABLE_SIZE - 1;
     }
 
-    DAC_UpdateValue(LPC_DAC, sineLookupTable[sinPhase]);
+    DAC_UpdateValue(LPC_DAC, sineLookupTable[sinPhase] * volume / 100);
 
     /* Clear interrupt status */
     LPC_TIM1->IR = 0xffffffff;
@@ -344,6 +347,7 @@ void configurePeripherials()
     configureAndStartADC();
     configureAndStartDAC();
     configureAndStartSpeakerAmplifier();
+    configureJoystick();
 }
 
 void configureInterrupts()
@@ -389,6 +393,74 @@ void configureSystemClock100Mhz(){
     while (!(LPC_SC->PLL0STAT & ((BIT(25)) | (BIT(24))))) {}  //Wait for PLLC0_STAT & PLLE0_STAT
 }
 
+struct{
+	int left;
+	int right;
+	int bottom;
+	int top;
+	int center;
+} joystickStatus;
+
+void processJoystick(){
+	//top
+	int lastTopStatus = joystickStatus.top;
+	int currentTopStatus = !(LPC_GPIO0->FIOPIN & BIT(15));
+	joystickStatus.top = currentTopStatus;
+	if(currentTopStatus == 1 && lastTopStatus == 0){
+		if(volume > 0)
+			volume -= 10;
+	}
+
+	//bottom
+	int lastBottomStatus = joystickStatus.bottom;
+	int currentBottomStatus = !(LPC_GPIO2->FIOPIN & BIT(3));
+	joystickStatus.bottom = currentBottomStatus;
+	if(currentBottomStatus == 1 && lastBottomStatus == 0){
+		if(volume < 100)
+					volume += 10;
+	}
+
+	//right
+	int lastRightStatus = joystickStatus.right;
+	int currentRightStatus = !(LPC_GPIO2->FIOPIN & BIT(4));
+	joystickStatus.right = currentRightStatus;
+	if(currentRightStatus == 1 && lastRightStatus == 0){
+		if(currentInterval > 0)
+			currentInterval -= 1;
+	}
+
+	//left
+	int lastLeftStatus = joystickStatus.left;
+	int currentLeftStatus = !(LPC_GPIO0->FIOPIN & BIT(16));
+	joystickStatus.left = currentLeftStatus;
+	if(currentLeftStatus == 1 && lastLeftStatus == 0){
+		if(currentInterval < 12)
+			currentInterval += 1;
+	}
+
+	//center
+	int lastCenterStatus = joystickStatus.center;
+	int currentCenterStatus = !(LPC_GPIO0->FIOPIN & BIT(17));
+	joystickStatus.center = currentCenterStatus;
+	if(currentCenterStatus == 1 && lastCenterStatus == 0){
+		graphStatus = (graphStatus + 1) % 2;
+	}
+
+	//set current status
+}
+
+void configureJoystick(){
+	//buttons address
+	//GPIO 0_15, 0_16, 0_17, 2_3, 2_4
+
+	//set direction - input
+	LPC_GPIO0->FIODIR &= ~BIT(15);	//top
+	LPC_GPIO0->FIODIR &= ~BIT(16);	//left
+	LPC_GPIO0->FIODIR &= ~BIT(17);	//center
+	LPC_GPIO2->FIODIR &= ~BIT(3);	//bottom
+	LPC_GPIO2->FIODIR &= ~BIT(4);	//right
+}
+
 
 void configureAndStartOLED()
 {
@@ -414,26 +486,37 @@ void runMainProgramLoop()
 
         //------------------------------- OLED
 
-        for (int page = 0; page < 8; ++page) {
-            writeCommand(0xb0 + page); //page number
-            // start column = 18
-            writeCommand(0x02); //start column low 2
-            writeCommand(0x11); //start column high 1
+        if(graphStatus == FOURIER_GRAPH){
+			for (int page = 7; page >= 0; page--) {
+				writeCommand(0xb0 + page); //page number
+				// start column = 18
+				writeCommand(0x02); //start column low 2
+				writeCommand(0x11); //start column high 1
 
-            for (int column = OLED_DISPLAY_WIDTH - 1; column >= 0; --column) {
-                if (normalizedAmplitude[column] >= (uint8_t)8) {
-                    writeData(0xff);
-                    normalizedAmplitude[column] -= (uint8_t)8;
-                }
-                else {
-                    writeData(((uint8_t)0xff) >> ((uint8_t)8 - normalizedAmplitude[column]));
-                    normalizedAmplitude[column] = 0;
-                }
-            }
+				for (int column = 0; column < OLED_DISPLAY_WIDTH; ++column) {
+					if (normalizedAmplitude[column] >= (uint8_t)8) {
+						writeData(0xff);
+						normalizedAmplitude[column] -= (uint8_t)8;
+					}else if(normalizedAmplitude[column] > (uint8_t)0){
+						writeData(((uint8_t)0xff) << (8 - ((uint8_t)normalizedAmplitude[column])));
+						normalizedAmplitude[column] = 0;
+					}else{
+						writeData(((uint8_t)00));
+					}
+				}
+			}
+        }else if(graphStatus == TEXT){
+        	char stringBuff[10];
+        	intToString(frequency, stringBuff, 10, 10);
+        	oled_clearScreen(OLED_COLOR_BLACK);
+        	oled_putString(0, 0, stringBuff, OLED_COLOR_WHITE, OLED_COLOR_BLACK);
         }
 
 
         //-------------------------------
+
+        //------------------------------- JOYSTICK
+        processJoystick();
 
 
 
@@ -455,7 +538,7 @@ int main()
 
 
 
-/* void intToString(int value, uint8_t* pBuf, uint32_t len, uint32_t base)
+void intToString(int value, uint8_t* pBuf, uint32_t len, uint32_t base)
 {
     static const char* pAscii = "0123456789abcdefghijklmnopqrstuvwxyz";
     int pos = 0;
@@ -511,4 +594,3 @@ int main()
     return;
 
 }
-*/
