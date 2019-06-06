@@ -40,7 +40,7 @@ uint16_t sineLookupTable[SINE_LOOKUP_TABLE_SIZE]
 /* ------------------------------------------------------------------- FFT -- */
 volatile int      value = 0;
 volatile int      frequency = 500;
-volatile int	  currentInterval = 0;
+volatile int	  interval = 0;
 volatile int	  volume = 100;
 volatile int	  graphStatus = FOURIER_GRAPH;
 
@@ -142,7 +142,7 @@ void TIMER1_IRQHandler()
 {
 	// choose interval
 	uint32_t intervalFrequency = frequency;
-	for (int i = 0; i < currentInterval; i++)
+	for (int i = 0; i < interval; i++)
 	{
 		intervalFrequency = intervalFrequency * SEMITONE_RATIO_NUMERATOR / SEMITONE_RATIO_DENOMINATOR;
 	}
@@ -442,8 +442,8 @@ void processJoystick(){
 	int currentRightStatus = !(LPC_GPIO2->FIOPIN & BIT(4));
 	joystickStatus.right = currentRightStatus;
 	if(currentRightStatus == 1 && lastRightStatus == 0){
-		if(currentInterval > 0)
-			currentInterval -= 1;
+		if(interval > 0)
+			interval -= 1;
 	}
 
 	//left
@@ -451,8 +451,8 @@ void processJoystick(){
 	int currentLeftStatus = !(LPC_GPIO0->FIOPIN & BIT(16));
 	joystickStatus.left = currentLeftStatus;
 	if(currentLeftStatus == 1 && lastLeftStatus == 0){
-		if(currentInterval < 11)
-			currentInterval += 1;
+		if(interval < 11)
+			interval += 1;
 	}
 
 	//center
@@ -532,7 +532,7 @@ void runMainProgramLoop()
         	char stringIntervalBuff[10];
         	intToString(frequency, stringFrequencyBuff, 10, 10);
         	intToString(volume, stringVolumeBuff, 10, 10);
-        	intToString(currentInterval, stringIntervalBuff, 10, 10);
+        	intToString(interval, stringIntervalBuff, 10, 10);
         	//oled_clearScreen(OLED_COLOR_BLACK);
         	oled_putString(0, 0, "frequency:", OLED_COLOR_WHITE, OLED_COLOR_BLACK);
         	oled_putString(0, 10, "interval:", OLED_COLOR_WHITE, OLED_COLOR_BLACK);
