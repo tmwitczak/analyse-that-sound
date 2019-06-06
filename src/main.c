@@ -67,20 +67,21 @@ void averageAmplitudes()
 {
 	float sumOfAmplitudes = 0;
 
-	for (int i = 0, j = 0;
-		 i < (FFT_POINTS_NUMBER / 2);
-		 ++i)
+	for (int amplitudeIndex = 0,
+             averagedAmplitudeIndex = 0;
+		 amplitudeIndex < (FFT_POINTS_NUMBER / 2);
+		 ++amplitudeIndex)
 	{
-		sumOfAmplitudes += amplitude[i];
+		sumOfAmplitudes += amplitude[amplitudeIndex];
 
-		if ((i != 0)
+		if ((amplitudeIndex != 0)
             &&
-            ((i % NUMBER_OF_AVERAGED_AMPLITUDES) == 0))
+            ((amplitudeIndex % NUMBER_OF_AVERAGED_AMPLITUDES) == 0))
 		{
-            averagedAmplitude[j]
+            averagedAmplitude[averagedAmplitudeIndex]
                     = sumOfAmplitudes / NUMBER_OF_AVERAGED_AMPLITUDES;
 
-            j++;
+            averagedAmplitudeIndex++;
 			sumOfAmplitudes = 0;
 		}
 	}
