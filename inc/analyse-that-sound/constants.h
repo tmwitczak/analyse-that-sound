@@ -7,8 +7,10 @@
 #define FALSE 0
 
 /* -------------------------------------------------------- FFT parameters -- */
-#define SAMPLE_RATE       8000
-#define FFT_POINTS_NUMBER 1024
+#define SAMPLE_RATE                8000
+#define FFT_POINTS_NUMBER          1024
+#define FFT_BUFFER_SIZE            (2 * FFT_POINTS_NUMBER)
+#define FFT_AMPLITUDE_USABLE_RANGE (FFT_POINTS_NUMBER / 2)
 
 /* ---------------------------------------------- Sine function parameters -- */
 #define SINE_LOOKUP_TABLE_SIZE 128

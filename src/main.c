@@ -46,7 +46,7 @@ volatile int      graphStatus = OLED_DISPLAY_MODE_FFT_GRAPH;
 volatile int16_t  sampleBuffer[FFT_POINTS_NUMBER];
 volatile int16_t  *currentSample = sampleBuffer;
 
-volatile float    fft_buffer[FFT_POINTS_NUMBER * 2];
+volatile float    fft_buffer[FFT_BUFFER_SIZE];
 volatile float    amplitude[FFT_POINTS_NUMBER];
 volatile float	  averagedAmplitude[OLED_DISPLAY_WIDTH];
 volatile uint8_t  normalizedAmplitude[OLED_DISPLAY_WIDTH];
@@ -58,8 +58,8 @@ volatile int      dacIterator = 0;
 /* \\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\ Functions */
 /* ------------------------------------------------------------------- FFT -- */
 #define NUMBER_OF_AVERAGED_AMPLITUDES                                          \
-                ((FFT_POINTS_NUMBER / 2) / OLED_DISPLAY_WIDTH                  \
-                 + ((FFT_POINTS_NUMBER / 2) % OLED_DISPLAY_WIDTH != 0          \
+                (FFT_AMPLITUDE_USABLE_RANGE / OLED_DISPLAY_WIDTH               \
+                 + (((FFT_AMPLITUDE_USABLE_RANGE % OLED_DISPLAY_WIDTH) != 0)   \
                     ? 1                                                        \
                     : 0))
 
@@ -69,7 +69,7 @@ void averageAmplitudes()
 
 	for (int amplitudeIndex = 0,
              averagedAmplitudeIndex = 0;
-		 amplitudeIndex < (FFT_POINTS_NUMBER / 2);
+		 amplitudeIndex < FFT_AMPLITUDE_USABLE_RANGE;
 		 ++amplitudeIndex)
 	{
 		sumOfAmplitudes += amplitude[amplitudeIndex];
