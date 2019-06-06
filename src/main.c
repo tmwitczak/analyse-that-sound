@@ -133,12 +133,23 @@ void fillFftBuffer()
     }
 }
 
+							 //4294967296
+#define SEMITONE_RATIO_NUMERATOR   105946
+#define SEMITONE_RATIO_DENOMINATOR 100000
 
 /* \\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\ Interrupt handlers */
 void TIMER1_IRQHandler()
 {
+	// choose interval
+	uint32_t intervalFrequency = frequency;
+	for (int i = 0; i < currentInterval; i++)
+	{
+		intervalFrequency = intervalFrequency * SEMITONE_RATIO_NUMERATOR / SEMITONE_RATIO_DENOMINATOR;
+	}
+
+
     //generate pure tone using dac
-    int step = 100000 / frequency;	//na przestrzeni tylu przerwan musimy zrobic caly okres
+    int step = 100000 / intervalFrequency;	//na przestrzeni tylu przerwan musimy zrobic caly okres
     int sinPhase = dacIterator * SINE_LOOKUP_TABLE_SIZE / step;
     dacIterator = (dacIterator + 1) % step;
 
