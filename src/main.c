@@ -505,24 +505,35 @@ void runMainProgramLoop()
 
 
         //------------------------------- OLED
-
-        if(graphStatus == OLED_DISPLAY_MODE_FFT_GRAPH)
+        if (graphStatus == OLED_DISPLAY_MODE_FFT_GRAPH)
         {
 			for (int page = 7;
-                 page >= 0; page--) {
+                 page >= 0;
+                 --page)
+            {
 				writeCommand(0xb0 + page); //page number
-				// start column = 18
+				// start column = 18 = 0x12
 				writeCommand(0x02); //start column low 2
 				writeCommand(0x11); //start column high 1
 
-				for (int column = 0; column < OLED_DISPLAY_WIDTH; ++column) {
-					if (normalizedAmplitude[column] >= (uint8_t)8) {
+				for (int column = 0;
+                     column < OLED_DISPLAY_WIDTH;
+                     ++column)
+                {
+					if (normalizedAmplitude[column] >= (uint8_t)8)
+                    {
 						writeData(0xff);
 						normalizedAmplitude[column] -= (uint8_t)8;
-					}else if(normalizedAmplitude[column] > (uint8_t)0){
-						writeData(((uint8_t)0xff) << (8 - ((uint8_t)normalizedAmplitude[column])));
-						normalizedAmplitude[column] = 0;
-					}else{
+					}
+                    else if (normalizedAmplitude[column] > (uint8_t)0)
+                    {
+						writeData(((uint8_t)0xff)
+                                  << ((uint8_t)8
+                                      - normalizedAmplitude[column]));
+						normalizedAmplitude[column] = (uint8_t)0;
+					}
+                    else
+                    {
 						writeData(((uint8_t)00));
 					}
 				}
@@ -533,9 +544,11 @@ void runMainProgramLoop()
         	char stringFrequencyBuff[10];
         	char stringVolumeBuff[10];
         	char stringIntervalBuff[10];
+
         	intToString(frequency, stringFrequencyBuff, 10, 10);
         	intToString(volume, stringVolumeBuff, 10, 10);
         	intToString(interval, stringIntervalBuff, 10, 10);
+
         	//oled_clearScreen(OLED_COLOR_BLACK);
         	oled_putString(0, 0, "frequency:", OLED_COLOR_WHITE, OLED_COLOR_BLACK);
         	oled_putString(0, 10, "interval:", OLED_COLOR_WHITE, OLED_COLOR_BLACK);
@@ -545,16 +558,11 @@ void runMainProgramLoop()
         	oled_putString(60, 20, stringVolumeBuff, OLED_COLOR_WHITE, OLED_COLOR_BLACK);
         }
 
-
-        //-------------------------------
-
         //------------------------------- JOYSTICK
         processJoystick();
-
-
-
     }
 }
+
 
 /* \\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\ AnalyseThatSound */
 int main()
