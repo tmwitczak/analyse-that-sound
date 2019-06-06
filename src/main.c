@@ -41,7 +41,7 @@ uint16_t sineLookupTable[SINE_LOOKUP_TABLE_SIZE]
 volatile int      frequency = 500;
 volatile int	  interval = 0;
 volatile int	  volume = 100;
-volatile int	  graphStatus = FOURIER_GRAPH;
+volatile int      graphStatus = OLED_DISPLAY_MODE_FFT_GRAPH;
 
 volatile int16_t  sampleBuffer[FFT_POINTS_NUMBER];
 volatile int16_t  *currentSample = sampleBuffer;
@@ -506,8 +506,10 @@ void runMainProgramLoop()
 
         //------------------------------- OLED
 
-        if(graphStatus == FOURIER_GRAPH){
-			for (int page = 7; page >= 0; page--) {
+        if(graphStatus == OLED_DISPLAY_MODE_FFT_GRAPH)
+        {
+			for (int page = 7;
+                 page >= 0; page--) {
 				writeCommand(0xb0 + page); //page number
 				// start column = 18
 				writeCommand(0x02); //start column low 2
@@ -525,7 +527,9 @@ void runMainProgramLoop()
 					}
 				}
 			}
-        }else if(graphStatus == TEXT){
+        }
+        else if (graphStatus == OLED_DISPLAY_MODE_FFT_STATISTICS)
+        {
         	char stringFrequencyBuff[10];
         	char stringVolumeBuff[10];
         	char stringIntervalBuff[10];
