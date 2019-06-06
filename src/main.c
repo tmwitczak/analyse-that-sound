@@ -140,10 +140,6 @@ void fillFftBuffer()
     }
 }
 
-							 //4294967296
-#define SEMITONE_RATIO_NUMERATOR   105946
-#define SEMITONE_RATIO_DENOMINATOR 100000
-
 /* \\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\ Interrupt handlers */
 void TIMER1_IRQHandler()
 {
