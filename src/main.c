@@ -97,7 +97,7 @@ void normalizeAmplitudes()
 void findMaxAmplitudes()
 {
 	for(int i = 0;
-		i < FFT_POINTS_NUMBER / 2;
+		i < FFT_AMPLITUDE_USABLE_RANGE;
 		++i)
 	{
 		if(amplitude[i] > amplitude[amplitudeMaxIndex])
