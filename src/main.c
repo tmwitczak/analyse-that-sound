@@ -87,7 +87,10 @@ void normalizeAmplitudes()
          i < OLED_DISPLAY_WIDTH;
          ++i)
     {
-    	normalizedAmplitude[i] = averagedAmplitude[i] / averagedAmplitude[averagedAmplitudeMaxIndex] * OLED_DISPLAY_HEIGHT;
+    	normalizedAmplitude[i]
+                = averagedAmplitude[i]
+                  / averagedAmplitude[averagedAmplitudeMaxIndex]
+                    * OLED_DISPLAY_HEIGHT;
     }
 }
 
