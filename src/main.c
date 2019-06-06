@@ -57,14 +57,15 @@ volatile int      dacIterator = 0;
 
 /* \\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\ Functions */
 /* ------------------------------------------------------------------- FFT -- */
+#define NUMBER_OF_AVERAGED_AMPLITUDES                                          \
+                ((FFT_POINTS_NUMBER / 2) / OLED_DISPLAY_WIDTH                  \
+                 + ((FFT_POINTS_NUMBER / 2) % OLED_DISPLAY_WIDTH != 0          \
+                    ? 1                                                        \
+                    : 0))
+
 void averageAmplitudes()
 {
 	float sumOfAmplitudes = 0;
-	int numberOfAveragedAmplitudes
-            = (FFT_POINTS_NUMBER / 2) / OLED_DISPLAY_WIDTH
-              + ((FFT_POINTS_NUMBER / 2) % OLED_DISPLAY_WIDTH != 0
-                ? 1
-                : 0);
 
 	for (int i = 0, j = 0;
 		 i < (FFT_POINTS_NUMBER / 2);
@@ -74,9 +75,10 @@ void averageAmplitudes()
 
 		if ((i != 0)
             &&
-            ((i % numberOfAveragedAmplitudes) == 0))
+            ((i % NUMBER_OF_AVERAGED_AMPLITUDES) == 0))
 		{
-			averagedAmplitude[j] = sumOfAmplitudes / numberOfAveragedAmplitudes;
+            averagedAmplitude[j]
+                    = sumOfAmplitudes / NUMBER_OF_AVERAGED_AMPLITUDES;
 
             j++;
 			sumOfAmplitudes = 0;
