@@ -50,12 +50,10 @@ volatile int16_t  *currentSample = sampleBuffer;
 volatile float    fft_buffer[FFT_POINTS_NUMBER * 2];
 volatile float    amplitude[FFT_POINTS_NUMBER];
 
-
 volatile uint8_t  normalizedAmplitude[OLED_DISPLAY_WIDTH];
 volatile float    globalAmplitudeMax;
 volatile uint16_t localAmplitudeMaxIndex = 1;
 
-volatile int      dacAmplitudeValue = 0;
 volatile int      dacIterator = 0;
 
 /* \\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\ Functions */
@@ -434,7 +432,7 @@ void processJoystick(){
 	int currentLeftStatus = !(LPC_GPIO0->FIOPIN & BIT(16));
 	joystickStatus.left = currentLeftStatus;
 	if(currentLeftStatus == 1 && lastLeftStatus == 0){
-		if(currentInterval < 12)
+		if(currentInterval < 11)
 			currentInterval += 1;
 	}
 
@@ -506,10 +504,19 @@ void runMainProgramLoop()
 				}
 			}
         }else if(graphStatus == TEXT){
-        	char stringBuff[10];
-        	intToString(frequency, stringBuff, 10, 10);
-        	oled_clearScreen(OLED_COLOR_BLACK);
-        	oled_putString(0, 0, stringBuff, OLED_COLOR_WHITE, OLED_COLOR_BLACK);
+        	char stringFrequencyBuff[10];
+        	char stringVolumeBuff[10];
+        	char stringIntervalBuff[10];
+        	intToString(frequency, stringFrequencyBuff, 10, 10);
+        	intToString(volume, stringVolumeBuff, 10, 10);
+        	intToString(currentInterval, stringIntervalBuff, 10, 10);
+        	//oled_clearScreen(OLED_COLOR_BLACK);
+        	oled_putString(0, 0, "frequency:", OLED_COLOR_WHITE, OLED_COLOR_BLACK);
+        	oled_putString(0, 10, "interval:", OLED_COLOR_WHITE, OLED_COLOR_BLACK);
+        	oled_putString(0, 20, "volume:", OLED_COLOR_WHITE, OLED_COLOR_BLACK);
+        	oled_putString(60, 0, stringFrequencyBuff, OLED_COLOR_WHITE, OLED_COLOR_BLACK);
+        	oled_putString(60, 10, stringIntervalBuff, OLED_COLOR_WHITE, OLED_COLOR_BLACK);
+        	oled_putString(60, 20, stringVolumeBuff, OLED_COLOR_WHITE, OLED_COLOR_BLACK);
         }
 
 
