@@ -41,5 +41,15 @@ volatile uint16_t amplitudeMaxIndex = 0;
 
 volatile int      dacIterator = 0;
 
+struct
+{
+    int left;
+    int right;
+    int bottom;
+    int top;
+    int center;
+}
+joystickStatus;
+
 
 /* \\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\ */

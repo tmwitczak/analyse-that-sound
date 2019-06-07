@@ -28,5 +28,15 @@ extern volatile uint16_t amplitudeMaxIndex;
 
 extern volatile int      dacIterator;
 
+extern struct
+{
+	int left;
+	int right;
+	int bottom;
+	int top;
+	int center;
+}
+joystickStatus;
+
 
 /* \\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\ */

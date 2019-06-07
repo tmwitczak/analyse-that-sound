@@ -375,14 +375,6 @@ void configureSystemClock100Mhz(void){
     while (!(LPC_SC->PLL0STAT & ((BIT(25)) | (BIT(24))))) {}  //Wait for PLLC0_STAT & PLLE0_STAT
 }
 
-struct{
-	int left;
-	int right;
-	int bottom;
-	int top;
-	int center;
-} joystickStatus;
-
 void processJoystick(void){
 	//top
 	int lastTopStatus = joystickStatus.top;
