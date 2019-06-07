@@ -105,24 +105,24 @@ void fillFftBuffer(void)
     }
 }
 
-void findFundamentalFrequency()
+void findFundamentalFrequency(void)
 {
     frequency = (uint16_t)SAMPLE_RATE * amplitudeMaxIndex
                 / (uint16_t)FFT_POINTS_NUMBER;
 }
 
-void zeroUnusedAmplitudes()
+void zeroUnusedAmplitudes(void)
 {
     amplitude[0] = 0;
 }
 
-void computeFft()
+void computeFft(void)
 {
     arm_cfft_f32(&arm_cfft_sR_f32_len1024, fft_buffer, 0, 1);
     arm_cmplx_mag_f32(fft_buffer, amplitude, FFT_POINTS_NUMBER);
 }
 
-void doFftComputations()
+void doFftComputations(void)
 {
     fillFftBuffer();
     computeFft();
