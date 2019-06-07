@@ -26,7 +26,7 @@ void configureBoard(void)
 {
     configureSystemClock();
     configurePeripherials();
-    configureInterrupts();
+    configureInterruptsInNVIC();
 }
 
 static
@@ -294,12 +294,16 @@ void configureJoystick(void)
 }
 
 static
-void configureInterrupts(void)
+void configureInterruptsInNVIC(void)
 {
-    /* Enable/Disable NVIC interrupts */
-    NVIC->ICER[0] |= BIT(1);		// Disable timer0 interrupts
-    NVIC->ISER[0] |= BIT(2);		// Enable timer1 interrupts
-    NVIC->ISER[0] |= BIT(22);		// Enable ADC interrupts
+    /* Disable TIMER0 interrupts */
+    NVIC->ICER[0] |= BIT(1);                          /* [@user-manual:6.5.3] */
+
+    /* Enable TIMER1 interrupts */
+    NVIC->ISER[0] |= BIT(2);                          /* [@user-manual:6.5.1] */
+
+    /* Enable ADC interrupts */
+    NVIC->ISER[0] |= BIT(22);                         /* [@user-manual:6.5.1] */
 }
 
 
