@@ -92,7 +92,8 @@ void configureSystemClock(void)
              & ((BIT(25)) | (BIT(24))))) {}
 }
 
-static void configurePeripherials(void)
+static
+void configurePeripherials(void)
 {
     configureAndStartOLED();
     configureAndStartTimer0();
@@ -103,14 +104,16 @@ static void configurePeripherials(void)
     configureJoystick();
 }
 
-static void configureAndStartOLED(void)
+static
+void configureAndStartOLED(void)
 {
     init_ssp();
     init_i2c();
     oled_init();
 }
 
-static void init_ssp(void)
+static
+void init_ssp(void)
 {
     SSP_CFG_Type SSP_ConfigStruct;
     PINSEL_CFG_Type PinCfg;
@@ -140,7 +143,8 @@ static void init_ssp(void)
 
 }
 
-static void init_i2c(void)
+static
+void init_i2c(void)
 {
     PINSEL_CFG_Type PinCfg;
 
@@ -158,7 +162,8 @@ static void init_i2c(void)
     I2C_Cmd(LPC_I2C2, ENABLE);
 }
 
-static void configureAndStartTimer0(void)
+static
+void configureAndStartTimer0(void)
 {
     /* Turn on power */
     CLKPWR_ConfigPPWR(CLKPWR_PCONP_PCTIM0, ENABLE);
@@ -186,7 +191,8 @@ static void configureAndStartTimer0(void)
     LPC_TIM0->TCR |= BIT(0);
 }
 
-static void configureAndStartTimer1(void)
+static
+void configureAndStartTimer1(void)
 {
     /* Turn on power */
     CLKPWR_ConfigPPWR(CLKPWR_PCONP_PCTIM1,
@@ -212,7 +218,8 @@ static void configureAndStartTimer1(void)
     LPC_TIM1->TCR |= BIT(0);
 }
 
-static void configureAndStartADC(void)
+static
+void configureAndStartADC(void)
 {
     /* Turn on power */
     CLKPWR_ConfigPPWR(CLKPWR_PCONP_PCAD,
@@ -248,7 +255,8 @@ static void configureAndStartADC(void)
     LPC_ADC->ADCR &= ~BIT(24);
 }
 
-static void configureAndStartDAC(void)
+static
+void configureAndStartDAC(void)
 {
     /* Turn on power and configureBoard pin */
     LPC_PINCON->PINSEL1 &= ~(BIT(21) | BIT(20));
@@ -259,7 +267,8 @@ static void configureAndStartDAC(void)
                       CLKPWR_PCLKSEL_CCLK_DIV_4);
 }
 
-static void configureAndStartSpeakerAmplifier(void)
+static
+void configureAndStartSpeakerAmplifier(void)
 {
     GPIO_SetDir(0, BIT(27), 1);
     GPIO_SetDir(0, BIT(28), 1);
@@ -270,7 +279,8 @@ static void configureAndStartSpeakerAmplifier(void)
     GPIO_ClearValue(2, BIT(13));	//LM4811-shutdn
 }
 
-static void configureJoystick(void)
+static
+void configureJoystick(void)
 {
     //buttons address
     //GPIO 0_15, 0_16, 0_17, 2_3, 2_4
@@ -283,7 +293,8 @@ static void configureJoystick(void)
     LPC_GPIO2->FIODIR &= ~BIT(4);	//right
 }
 
-static void configureInterrupts(void)
+static
+void configureInterrupts(void)
 {
     /* Enable/Disable NVIC interrupts */
     NVIC->ICER[0] |= BIT(1);		// Disable timer0 interrupts
