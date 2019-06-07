@@ -370,52 +370,65 @@ void configureSystemClock(void){
     while (!(LPC_SC->PLL0STAT & ((BIT(25)) | (BIT(24))))) {}  //Wait for PLLC0_STAT & PLLE0_STAT
 }
 
-void processJoystick(void){
-    //top
-    int lastTopStatus = joystickStatus.top;
-    int currentTopStatus = !(LPC_GPIO0->FIOPIN & BIT(15));
-    joystickStatus.top = currentTopStatus;
-    if(currentTopStatus == 1 && lastTopStatus == 0){
-        if(volume > 0)
+
+void updateJoystickDirectionStatus(JoystickDirection *joystickDirection,
+                                   LPC_GPIO_TypeDef *gpio,
+                                   int bit)
+{
+    joystickDirection->previous = joystickDirection->current;
+    joystickDirection->current = !(gpio->FIOPIN & BIT(bit));
+}
+
+BOOL isJoystickDirectionToggledOn(JoystickDirection *joystickDirection)
+{
+    return ((joystickDirection->current == JOYSTICK_DIRECTION_STATUS_ON)
+            &&
+            (joystickDirection->previous == JOYSTICK_DIRECTION_STATUS_OFF));
+}
+
+
+void updateJoystickStatus(void)
+{
+    updateJoystickDirectionStatus(&joystick.top,    LPC_GPIO0, 15);
+    updateJoystickDirectionStatus(&joystick.bottom, LPC_GPIO2,  3);
+    updateJoystickDirectionStatus(&joystick.left,   LPC_GPIO0, 16);
+    updateJoystickDirectionStatus(&joystick.right,  LPC_GPIO2,  4);
+    updateJoystickDirectionStatus(&joystick.center, LPC_GPIO0, 17);
+}
+
+void handleJoystickEvents(void)
+{
+    // Volume adjustment | Top/Bottom
+    if (isJoystickDirectionToggledOn(&joystick.top))
+    {
+        if (volume > 0)
             volume -= 10;
     }
 
-    //bottom
-    int lastBottomStatus = joystickStatus.bottom;
-    int currentBottomStatus = !(LPC_GPIO2->FIOPIN & BIT(3));
-    joystickStatus.bottom = currentBottomStatus;
-    if(currentBottomStatus == 1 && lastBottomStatus == 0){
-        if(volume < 100)
-                    volume += 10;
+    if (isJoystickDirectionToggledOn(&joystick.bottom))
+    {
+        if (volume < 100)
+            volume += 10;
     }
 
-    //right
-    int lastRightStatus = joystickStatus.right;
-    int currentRightStatus = !(LPC_GPIO2->FIOPIN & BIT(4));
-    joystickStatus.right = currentRightStatus;
-    if(currentRightStatus == 1 && lastRightStatus == 0){
-        if(interval > 0)
+    // Interval adjustment | Left/Right
+    if (isJoystickDirectionToggledOn(&joystick.right))
+    {
+        if (interval > 0)
             interval -= 1;
     }
 
-    //left
-    int lastLeftStatus = joystickStatus.left;
-    int currentLeftStatus = !(LPC_GPIO0->FIOPIN & BIT(16));
-    joystickStatus.left = currentLeftStatus;
-    if(currentLeftStatus == 1 && lastLeftStatus == 0){
-        if(interval < 11)
+    if (isJoystickDirectionToggledOn(&joystick.left))
+    {
+        if (interval < 11)
             interval += 1;
     }
 
-    //center
-    int lastCenterStatus = joystickStatus.center;
-    int currentCenterStatus = !(LPC_GPIO0->FIOPIN & BIT(17));
-    joystickStatus.center = currentCenterStatus;
-    if(currentCenterStatus == 1 && lastCenterStatus == 0){
+    // OLED display mode adjustment | Center
+    if (isJoystickDirectionToggledOn(&joystick.center))
+    {
         graphStatus = (graphStatus + 1) % 2;
     }
-
-    //set current status
 }
 
 void configureJoystick(void){
@@ -532,7 +545,8 @@ void runMainProgramLoop(void)
             default:                                                    break;
         }
 
-        processJoystick();
+        updateJoystickStatus();
+        handleJoystickEvents();
     }
 }
 

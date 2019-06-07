@@ -1,5 +1,6 @@
 /* \\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\ Includes */
 #include "analyse-that-sound/constants.h"
+#include "analyse-that-sound/types/joystick.h"
 
 #include <stdint.h>
 #include <oled.h>
@@ -28,15 +29,7 @@ extern volatile uint16_t amplitudeMaxIndex;
 
 extern volatile int      dacIterator;
 
-extern struct
-{
-    int left;
-    int right;
-    int bottom;
-    int top;
-    int center;
-}
-joystickStatus;
+extern volatile Joystick joystick;
 
 
 /* \\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\ */
