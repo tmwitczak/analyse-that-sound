@@ -311,7 +311,7 @@ static void init_i2c(void)
 
 void configureBoard(void)
 {
-    configureSystemClock100Mhz();
+    configureSystemClock();
     configurePeripherials();
     configureInterrupts();
 }
@@ -335,7 +335,7 @@ void configureInterrupts(void)
     NVIC->ISER[0] |= BIT(22);		// Enable ADC interrupts
 }
 
-void configureSystemClock100Mhz(void){
+void configureSystemClock(void){
     LPC_SC->SCS       = BIT(5);				// Enable main oscillator (30)
     while ((LPC_SC->SCS & (BIT(6))) == 0) {}	// Wait for Oscillator to be ready
     LPC_SC->CCLKCFG   =	2;      			// Setup Clock Divider - 3 (57)
