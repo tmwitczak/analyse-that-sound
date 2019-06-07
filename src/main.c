@@ -309,11 +309,6 @@ static void init_i2c(void)
     I2C_Cmd(LPC_I2C2, ENABLE);
 }
 
-void writeByteToSPI(uint8_t byte) {
-    LPC_SPI->SPDR = byte;
-    while(!(LPC_SPI->SPSR & BIT(7))) {}
-}
-
 void configureBoard(void)
 {
     configureSystemClock100Mhz();
