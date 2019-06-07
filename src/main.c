@@ -438,80 +438,100 @@ void configureAndStartOLED(void)
     oled_init();
 }
 
+void findFundamentalFrequency()
+{
+    frequency = (uint16_t)SAMPLE_RATE * amplitudeMaxIndex
+                / (uint16_t)FFT_POINTS_NUMBER;
+}
+
+void zeroUnusedAmplitudes()
+{
+    amplitude[0] = 0;
+}
+
+void computeFft()
+{
+    arm_cfft_f32(&arm_cfft_sR_f32_len1024, fft_buffer, 0, 1);
+    arm_cmplx_mag_f32(fft_buffer, amplitude, FFT_POINTS_NUMBER);
+}
+
+void doFftComputations()
+{
+    fillFftBuffer();
+    computeFft();
+
+    zeroUnusedAmplitudes();
+    averageAmplitudes();
+    findMaxAmplitudes();
+    normalizeAmplitudes();
+
+    findFundamentalFrequency();
+}
+
+void drawFftGraph(void)
+{
+    for (int page = 7;
+         page >= 0;
+         --page)
+    {
+        writeCommand(0xb0 + page); //page number
+        // start column = 18 = 0x12
+        writeCommand(0x02); //start column low 2
+        writeCommand(0x11); //start column high 1
+
+        for (int column = 0;
+             column < OLED_DISPLAY_WIDTH;
+             ++column)
+        {
+            if (normalizedAmplitude[column] >= (uint8_t)8)
+            {
+                writeData(0xff);
+                normalizedAmplitude[column] -= (uint8_t)8;
+            }
+            else if (normalizedAmplitude[column] > (uint8_t)0)
+            {
+                writeData(((uint8_t)0xff)
+                          << ((uint8_t)8 - normalizedAmplitude[column]));
+                normalizedAmplitude[column] = (uint8_t)0;
+            }
+            else
+            {
+                writeData(((uint8_t)00));
+            }
+        }
+    }
+}
+void drawFftStatistics(void)
+{
+    char stringFrequencyBuff[10];
+    char stringVolumeBuff[10];
+    char stringIntervalBuff[10];
+
+    intToString(frequency, stringFrequencyBuff, 10, 10);
+    intToString(volume, stringVolumeBuff, 10, 10);
+    intToString(interval, stringIntervalBuff, 10, 10);
+
+    //oled_clearScreen(OLED_COLOR_BLACK);
+    oled_putString(0, 0, "frequency:", OLED_COLOR_WHITE, OLED_COLOR_BLACK);
+    oled_putString(0, 10, "interval:", OLED_COLOR_WHITE, OLED_COLOR_BLACK);
+    oled_putString(0, 20, "volume:", OLED_COLOR_WHITE, OLED_COLOR_BLACK);
+    oled_putString(60, 0, stringFrequencyBuff, OLED_COLOR_WHITE, OLED_COLOR_BLACK);
+    oled_putString(60, 10, stringIntervalBuff, OLED_COLOR_WHITE, OLED_COLOR_BLACK);
+    oled_putString(60, 20, stringVolumeBuff, OLED_COLOR_WHITE, OLED_COLOR_BLACK);
+}
 void runMainProgramLoop(void)
 {
     while(TRUE)
     {
-        fillFftBuffer();
+        doFftComputations();
 
-        arm_cfft_f32(&arm_cfft_sR_f32_len1024, fft_buffer, 0, 1);
-        arm_cmplx_mag_f32(fft_buffer, amplitude, FFT_POINTS_NUMBER);
-
-        //bad value :(
-        amplitude[0] = 0;
-
-        averageAmplitudes();
-        findMaxAmplitudes();
-        normalizeAmplitudes();
-
-        frequency = (uint16_t)SAMPLE_RATE * amplitudeMaxIndex / (uint16_t)FFT_POINTS_NUMBER;
-
-
-        //------------------------------- OLED
-        if (graphStatus == OLED_DISPLAY_MODE_FFT_GRAPH)
+        switch(graphStatus)
         {
-            for (int page = 7;
-                 page >= 0;
-                 --page)
-            {
-                writeCommand(0xb0 + page); //page number
-                // start column = 18 = 0x12
-                writeCommand(0x02); //start column low 2
-                writeCommand(0x11); //start column high 1
-
-                for (int column = 0;
-                     column < OLED_DISPLAY_WIDTH;
-                     ++column)
-                {
-                    if (normalizedAmplitude[column] >= (uint8_t)8)
-                    {
-                        writeData(0xff);
-                        normalizedAmplitude[column] -= (uint8_t)8;
-                    }
-                    else if (normalizedAmplitude[column] > (uint8_t)0)
-                    {
-                        writeData(((uint8_t)0xff)
-                                  << ((uint8_t)8
-                                      - normalizedAmplitude[column]));
-                        normalizedAmplitude[column] = (uint8_t)0;
-                    }
-                    else
-                    {
-                        writeData(((uint8_t)00));
-                    }
-                }
-            }
-        }
-        else if (graphStatus == OLED_DISPLAY_MODE_FFT_STATISTICS)
-        {
-            char stringFrequencyBuff[10];
-            char stringVolumeBuff[10];
-            char stringIntervalBuff[10];
-
-            intToString(frequency, stringFrequencyBuff, 10, 10);
-            intToString(volume, stringVolumeBuff, 10, 10);
-            intToString(interval, stringIntervalBuff, 10, 10);
-
-            //oled_clearScreen(OLED_COLOR_BLACK);
-            oled_putString(0, 0, "frequency:", OLED_COLOR_WHITE, OLED_COLOR_BLACK);
-            oled_putString(0, 10, "interval:", OLED_COLOR_WHITE, OLED_COLOR_BLACK);
-            oled_putString(0, 20, "volume:", OLED_COLOR_WHITE, OLED_COLOR_BLACK);
-            oled_putString(60, 0, stringFrequencyBuff, OLED_COLOR_WHITE, OLED_COLOR_BLACK);
-            oled_putString(60, 10, stringIntervalBuff, OLED_COLOR_WHITE, OLED_COLOR_BLACK);
-            oled_putString(60, 20, stringVolumeBuff, OLED_COLOR_WHITE, OLED_COLOR_BLACK);
+            case OLED_DISPLAY_MODE_FFT_GRAPH:      drawFftGraph();      break;
+            case OLED_DISPLAY_MODE_FFT_STATISTICS: drawFftStatistics(); break;
+            default:                                                    break;
         }
 
-        //------------------------------- JOYSTICK
         processJoystick();
     }
 }
