@@ -29,40 +29,67 @@ void configureBoard(void)
     configureInterrupts();
 }
 
-static void configureSystemClock(void)
+static
+void configureSystemClock(void)
 {
-    LPC_SC->SCS       = BIT(5);				// Enable main oscillator (30)
-    while ((LPC_SC->SCS & (BIT(6))) == 0) {}	// Wait for Oscillator to be ready
-    LPC_SC->CCLKCFG   =	2;      			// Setup Clock Divider - 3 (57)
-    LPC_SC->PCLKSEL0  = 0;       			// Peripheral Clock Selection - 4 for every peripheral
-    LPC_SC->PCLKSEL1  = 0;
-    LPC_SC->CLKSRCSEL = 1;    				// Select Clock Source for PLL0 - Main oscillator (36)
+    /* Enable main oscillator */
+    LPC_SC->SCS = BIT(5);                             /* [@user-manual:3.7.1] */
 
-    //target frequency - 100MHz
-    //pll source - main oscillator, FIN=12MHz
-    //pll output frquency, FCCO=300MHz (must be in range 275 to 550 MHz so we are using CLKCFG = 3)
-    //using M = (FCCO * N) / (2 * FIN) we have:
-    //M=25
-    //N=2
+    /* Wait for main oscillator to be ready */
+    while ((LPC_SC->SCS & BIT(6)) == 0) {}            /* [@user-manual:3.7.1] */
 
-    //configure PLL0
+    /* Set clock divisor: 3 */
+    LPC_SC->CCLKCFG = 2;                              /* [@user-manual:4.7.1] */
+
+    /* Set default peripheral clock divider: 4 */
+    LPC_SC->PCLKSEL0 = 0;                             /* [@user-manual:4.7.3] */
+    LPC_SC->PCLKSEL1 = 0;                             /* [@user-manual:4.7.3] */
+
+    /* Select main oscillator as clock source for PLL0 */
+    LPC_SC->CLKSRCSEL = 1;                            /* [@user-manual:4.4.1] */
+
+    /* Configure PLL0
+        > Target clock frequency:       100 MHz
+          PLL0 input frequency, (Fin):   12 MHz
+          PLL0 output frequency (Fout): 300 MHz (must be in range
+                                                 from 275 to 550 MHz
+                                                 so we are using further clock
+                                                 division (CLKCFG = 2))
+        > M = (Fcco * N) / (2 * Fin)
+          chosen possible integer solution:
+          M: 25
+          N: 2
+        > A correct feed sequence must be written to the
+          PLL0FEED register in order for changes to the
+          PLL0CON and PLL0CFG registers to take effect */
     uint16_t M = 25u;
     uint16_t N = 2u;
-    LPC_SC->PLL0CFG = ((N - (uint16_t)1) << (uint16_t)16) | (M - (uint16_t)1);
-    LPC_SC->PLL0FEED  = 0xAA;				//A correct feed sequence must be written to the PLL0FEED register
-    LPC_SC->PLL0FEED  = 0x55;				//in order for changes to the PLL0CON and PLL0CFG registers to take effect
 
-    //enable PLL0							(39)
-    LPC_SC->PLL0CON   = BIT(0);
-    LPC_SC->PLL0FEED  = 0xAA;
-    LPC_SC->PLL0FEED  = 0x55;
-    while (!(LPC_SC->PLL0STAT & (BIT(26)))) {} // Wait for PLOCK0
+    LPC_SC->PLL0CFG = ((N - (uint16_t)1)              /* [@user-manual:4.5.4] */
+                       << (uint16_t)16)
+                      | (M - (uint16_t)1);
 
-    //PLL0 Enable & Connect					(39)
-    LPC_SC->PLL0CON   = BIT(1) | BIT(0);
-    LPC_SC->PLL0FEED  = 0xAA;
-    LPC_SC->PLL0FEED  = 0x55;
-    while (!(LPC_SC->PLL0STAT & ((BIT(25)) | (BIT(24))))) {}  //Wait for PLLC0_STAT & PLLE0_STAT
+    LPC_SC->PLL0FEED = 0xAA;                          /* [@user-manual:4.5.8] */
+    LPC_SC->PLL0FEED = 0x55;                          /* [@user-manual:4.5.8] */
+
+    /* Enable PLL0 */
+    LPC_SC->PLL0CON = BIT(0);                         /* [@user-manual:4.5.3] */
+
+    LPC_SC->PLL0FEED = 0xAA;                          /* [@user-manual:4.5.8] */
+    LPC_SC->PLL0FEED = 0x55;                          /* [@user-manual:4.5.8] */
+
+    /* Wait for PLOCK0 */
+    while (!(LPC_SC->PLL0STAT & BIT(26))) {}          /* [@user-manual:4.5.5] */
+
+    /* Enable and connect PLL0 */
+    LPC_SC->PLL0CON = BIT(1) | BIT(0);                /* [@user-manual:4.5.3] */
+
+    LPC_SC->PLL0FEED  = 0xAA;                         /* [@user-manual:4.5.8] */
+    LPC_SC->PLL0FEED  = 0x55;                         /* [@user-manual:4.5.8] */
+
+    /* Wait for PLLC0_STAT and PLLE0_STAT */
+    while (!(LPC_SC->PLL0STAT                         /* [@user-manual:4.5.5] */
+             & ((BIT(25)) | (BIT(24))))) {}
 }
 
 static void configurePeripherials(void)
