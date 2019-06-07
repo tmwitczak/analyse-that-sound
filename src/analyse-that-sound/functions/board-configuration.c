@@ -282,15 +282,12 @@ void configureAndStartSpeakerAmplifier(void)
 static
 void configureJoystick(void)
 {
-    //buttons address
-    //GPIO 0_15, 0_16, 0_17, 2_3, 2_4
-
-    //set direction - input
-    LPC_GPIO0->FIODIR &= ~BIT(15);	//top
-    LPC_GPIO0->FIODIR &= ~BIT(16);	//left
-    LPC_GPIO0->FIODIR &= ~BIT(17);	//center
-    LPC_GPIO2->FIODIR &= ~BIT(3);	//bottom
-    LPC_GPIO2->FIODIR &= ~BIT(4);	//right
+    /* Set pins' directions to input */
+    LPC_GPIO0->FIODIR &= ~BIT(15);  /* top    */      /* [@user-manual:9.5.1] */
+    LPC_GPIO2->FIODIR &= ~BIT(3);	/* bottom */      /* [@user-manual:9.5.1] */
+    LPC_GPIO0->FIODIR &= ~BIT(16);	/* left   */      /* [@user-manual:9.5.1] */
+    LPC_GPIO2->FIODIR &= ~BIT(4);	/* right  */      /* [@user-manual:9.5.1] */
+    LPC_GPIO0->FIODIR &= ~BIT(17);	/* center */      /* [@user-manual:9.5.1] */
 }
 
 static
