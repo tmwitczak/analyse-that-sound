@@ -21,26 +21,26 @@
 /* ------------------------------------------------------------------- FFT -- */
 void averageAmplitudes(void)
 {
-	float sumOfAmplitudes = 0;
+    float sumOfAmplitudes = 0;
 
-	for (int amplitudeIndex = 0,
+    for (int amplitudeIndex = 0,
              averagedAmplitudeIndex = 0;
-		 amplitudeIndex < FFT_AMPLITUDE_USABLE_RANGE;
-		 ++amplitudeIndex)
-	{
-		sumOfAmplitudes += amplitude[amplitudeIndex];
+         amplitudeIndex < FFT_AMPLITUDE_USABLE_RANGE;
+         ++amplitudeIndex)
+    {
+        sumOfAmplitudes += amplitude[amplitudeIndex];
 
-		if ((amplitudeIndex != 0)
+        if ((amplitudeIndex != 0)
             &&
             ((amplitudeIndex % NUMBER_OF_AVERAGED_AMPLITUDES) == 0))
-		{
+        {
             averagedAmplitude[averagedAmplitudeIndex]
                     = sumOfAmplitudes / NUMBER_OF_AVERAGED_AMPLITUDES;
 
             averagedAmplitudeIndex++;
-			sumOfAmplitudes = 0;
-		}
-	}
+            sumOfAmplitudes = 0;
+        }
+    }
 }
 
 void normalizeAmplitudes(void)
@@ -49,7 +49,7 @@ void normalizeAmplitudes(void)
          i < OLED_DISPLAY_WIDTH;
          ++i)
     {
-    	normalizedAmplitude[i]
+        normalizedAmplitude[i]
                 = averagedAmplitude[i]
                   / averagedAmplitude[averagedAmplitudeMaxIndex]
                     * OLED_DISPLAY_HEIGHT;
@@ -58,15 +58,15 @@ void normalizeAmplitudes(void)
 
 void findMaxAmplitudes(void)
 {
-	for(int i = 0;
-		i < FFT_AMPLITUDE_USABLE_RANGE;
-		++i)
-	{
-		if(amplitude[i] > amplitude[amplitudeMaxIndex])
-		{
-			amplitudeMaxIndex = i;
-		}
-	}
+    for(int i = 0;
+        i < FFT_AMPLITUDE_USABLE_RANGE;
+        ++i)
+    {
+        if(amplitude[i] > amplitude[amplitudeMaxIndex])
+        {
+            amplitudeMaxIndex = i;
+        }
+    }
 
     for(int i = 0;
         i < OLED_DISPLAY_WIDTH;
@@ -105,12 +105,12 @@ void fillFftBuffer(void)
 /* \\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\ Interrupt handlers */
 void TIMER1_IRQHandler(void)
 {
-	// choose interval
-	uint32_t intervalFrequency = frequency;
-	for (int i = 0; i < interval; i++)
-	{
-		intervalFrequency = intervalFrequency * SEMITONE_RATIO_NUMERATOR / SEMITONE_RATIO_DENOMINATOR;
-	}
+    // choose interval
+    uint32_t intervalFrequency = frequency;
+    for (int i = 0; i < interval; i++)
+    {
+        intervalFrequency = intervalFrequency * SEMITONE_RATIO_NUMERATOR / SEMITONE_RATIO_DENOMINATOR;
+    }
 
 
     //generate pure tone using dac
@@ -376,63 +376,63 @@ void configureSystemClock100Mhz(void){
 }
 
 void processJoystick(void){
-	//top
-	int lastTopStatus = joystickStatus.top;
-	int currentTopStatus = !(LPC_GPIO0->FIOPIN & BIT(15));
-	joystickStatus.top = currentTopStatus;
-	if(currentTopStatus == 1 && lastTopStatus == 0){
-		if(volume > 0)
-			volume -= 10;
-	}
+    //top
+    int lastTopStatus = joystickStatus.top;
+    int currentTopStatus = !(LPC_GPIO0->FIOPIN & BIT(15));
+    joystickStatus.top = currentTopStatus;
+    if(currentTopStatus == 1 && lastTopStatus == 0){
+        if(volume > 0)
+            volume -= 10;
+    }
 
-	//bottom
-	int lastBottomStatus = joystickStatus.bottom;
-	int currentBottomStatus = !(LPC_GPIO2->FIOPIN & BIT(3));
-	joystickStatus.bottom = currentBottomStatus;
-	if(currentBottomStatus == 1 && lastBottomStatus == 0){
-		if(volume < 100)
-					volume += 10;
-	}
+    //bottom
+    int lastBottomStatus = joystickStatus.bottom;
+    int currentBottomStatus = !(LPC_GPIO2->FIOPIN & BIT(3));
+    joystickStatus.bottom = currentBottomStatus;
+    if(currentBottomStatus == 1 && lastBottomStatus == 0){
+        if(volume < 100)
+                    volume += 10;
+    }
 
-	//right
-	int lastRightStatus = joystickStatus.right;
-	int currentRightStatus = !(LPC_GPIO2->FIOPIN & BIT(4));
-	joystickStatus.right = currentRightStatus;
-	if(currentRightStatus == 1 && lastRightStatus == 0){
-		if(interval > 0)
-			interval -= 1;
-	}
+    //right
+    int lastRightStatus = joystickStatus.right;
+    int currentRightStatus = !(LPC_GPIO2->FIOPIN & BIT(4));
+    joystickStatus.right = currentRightStatus;
+    if(currentRightStatus == 1 && lastRightStatus == 0){
+        if(interval > 0)
+            interval -= 1;
+    }
 
-	//left
-	int lastLeftStatus = joystickStatus.left;
-	int currentLeftStatus = !(LPC_GPIO0->FIOPIN & BIT(16));
-	joystickStatus.left = currentLeftStatus;
-	if(currentLeftStatus == 1 && lastLeftStatus == 0){
-		if(interval < 11)
-			interval += 1;
-	}
+    //left
+    int lastLeftStatus = joystickStatus.left;
+    int currentLeftStatus = !(LPC_GPIO0->FIOPIN & BIT(16));
+    joystickStatus.left = currentLeftStatus;
+    if(currentLeftStatus == 1 && lastLeftStatus == 0){
+        if(interval < 11)
+            interval += 1;
+    }
 
-	//center
-	int lastCenterStatus = joystickStatus.center;
-	int currentCenterStatus = !(LPC_GPIO0->FIOPIN & BIT(17));
-	joystickStatus.center = currentCenterStatus;
-	if(currentCenterStatus == 1 && lastCenterStatus == 0){
-		graphStatus = (graphStatus + 1) % 2;
-	}
+    //center
+    int lastCenterStatus = joystickStatus.center;
+    int currentCenterStatus = !(LPC_GPIO0->FIOPIN & BIT(17));
+    joystickStatus.center = currentCenterStatus;
+    if(currentCenterStatus == 1 && lastCenterStatus == 0){
+        graphStatus = (graphStatus + 1) % 2;
+    }
 
-	//set current status
+    //set current status
 }
 
 void configureJoystick(void){
-	//buttons address
-	//GPIO 0_15, 0_16, 0_17, 2_3, 2_4
+    //buttons address
+    //GPIO 0_15, 0_16, 0_17, 2_3, 2_4
 
-	//set direction - input
-	LPC_GPIO0->FIODIR &= ~BIT(15);	//top
-	LPC_GPIO0->FIODIR &= ~BIT(16);	//left
-	LPC_GPIO0->FIODIR &= ~BIT(17);	//center
-	LPC_GPIO2->FIODIR &= ~BIT(3);	//bottom
-	LPC_GPIO2->FIODIR &= ~BIT(4);	//right
+    //set direction - input
+    LPC_GPIO0->FIODIR &= ~BIT(15);	//top
+    LPC_GPIO0->FIODIR &= ~BIT(16);	//left
+    LPC_GPIO0->FIODIR &= ~BIT(17);	//center
+    LPC_GPIO2->FIODIR &= ~BIT(3);	//bottom
+    LPC_GPIO2->FIODIR &= ~BIT(4);	//right
 }
 
 
@@ -465,55 +465,55 @@ void runMainProgramLoop(void)
         //------------------------------- OLED
         if (graphStatus == OLED_DISPLAY_MODE_FFT_GRAPH)
         {
-			for (int page = 7;
+            for (int page = 7;
                  page >= 0;
                  --page)
             {
-				writeCommand(0xb0 + page); //page number
-				// start column = 18 = 0x12
-				writeCommand(0x02); //start column low 2
-				writeCommand(0x11); //start column high 1
+                writeCommand(0xb0 + page); //page number
+                // start column = 18 = 0x12
+                writeCommand(0x02); //start column low 2
+                writeCommand(0x11); //start column high 1
 
-				for (int column = 0;
+                for (int column = 0;
                      column < OLED_DISPLAY_WIDTH;
                      ++column)
                 {
-					if (normalizedAmplitude[column] >= (uint8_t)8)
+                    if (normalizedAmplitude[column] >= (uint8_t)8)
                     {
-						writeData(0xff);
-						normalizedAmplitude[column] -= (uint8_t)8;
-					}
+                        writeData(0xff);
+                        normalizedAmplitude[column] -= (uint8_t)8;
+                    }
                     else if (normalizedAmplitude[column] > (uint8_t)0)
                     {
-						writeData(((uint8_t)0xff)
+                        writeData(((uint8_t)0xff)
                                   << ((uint8_t)8
                                       - normalizedAmplitude[column]));
-						normalizedAmplitude[column] = (uint8_t)0;
-					}
+                        normalizedAmplitude[column] = (uint8_t)0;
+                    }
                     else
                     {
-						writeData(((uint8_t)00));
-					}
-				}
-			}
+                        writeData(((uint8_t)00));
+                    }
+                }
+            }
         }
         else if (graphStatus == OLED_DISPLAY_MODE_FFT_STATISTICS)
         {
-        	char stringFrequencyBuff[10];
-        	char stringVolumeBuff[10];
-        	char stringIntervalBuff[10];
+            char stringFrequencyBuff[10];
+            char stringVolumeBuff[10];
+            char stringIntervalBuff[10];
 
-        	intToString(frequency, stringFrequencyBuff, 10, 10);
-        	intToString(volume, stringVolumeBuff, 10, 10);
-        	intToString(interval, stringIntervalBuff, 10, 10);
+            intToString(frequency, stringFrequencyBuff, 10, 10);
+            intToString(volume, stringVolumeBuff, 10, 10);
+            intToString(interval, stringIntervalBuff, 10, 10);
 
-        	//oled_clearScreen(OLED_COLOR_BLACK);
-        	oled_putString(0, 0, "frequency:", OLED_COLOR_WHITE, OLED_COLOR_BLACK);
-        	oled_putString(0, 10, "interval:", OLED_COLOR_WHITE, OLED_COLOR_BLACK);
-        	oled_putString(0, 20, "volume:", OLED_COLOR_WHITE, OLED_COLOR_BLACK);
-        	oled_putString(60, 0, stringFrequencyBuff, OLED_COLOR_WHITE, OLED_COLOR_BLACK);
-        	oled_putString(60, 10, stringIntervalBuff, OLED_COLOR_WHITE, OLED_COLOR_BLACK);
-        	oled_putString(60, 20, stringVolumeBuff, OLED_COLOR_WHITE, OLED_COLOR_BLACK);
+            //oled_clearScreen(OLED_COLOR_BLACK);
+            oled_putString(0, 0, "frequency:", OLED_COLOR_WHITE, OLED_COLOR_BLACK);
+            oled_putString(0, 10, "interval:", OLED_COLOR_WHITE, OLED_COLOR_BLACK);
+            oled_putString(0, 20, "volume:", OLED_COLOR_WHITE, OLED_COLOR_BLACK);
+            oled_putString(60, 0, stringFrequencyBuff, OLED_COLOR_WHITE, OLED_COLOR_BLACK);
+            oled_putString(60, 10, stringIntervalBuff, OLED_COLOR_WHITE, OLED_COLOR_BLACK);
+            oled_putString(60, 20, stringVolumeBuff, OLED_COLOR_WHITE, OLED_COLOR_BLACK);
         }
 
         //------------------------------- JOYSTICK

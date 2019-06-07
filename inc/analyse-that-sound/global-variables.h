@@ -30,11 +30,11 @@ extern volatile int      dacIterator;
 
 extern struct
 {
-	int left;
-	int right;
-	int bottom;
-	int top;
-	int center;
+    int left;
+    int right;
+    int bottom;
+    int top;
+    int center;
 }
 joystickStatus;
 
