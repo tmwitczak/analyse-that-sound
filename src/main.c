@@ -19,7 +19,7 @@
 
 /* \\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\ Functions */
 /* ------------------------------------------------------------------- FFT -- */
-void averageAmplitudes()
+void averageAmplitudes(void)
 {
 	float sumOfAmplitudes = 0;
 
@@ -43,7 +43,7 @@ void averageAmplitudes()
 	}
 }
 
-void normalizeAmplitudes()
+void normalizeAmplitudes(void)
 {
     for (int i = 0;
          i < OLED_DISPLAY_WIDTH;
@@ -56,7 +56,7 @@ void normalizeAmplitudes()
     }
 }
 
-void findMaxAmplitudes()
+void findMaxAmplitudes(void)
 {
 	for(int i = 0;
 		i < FFT_AMPLITUDE_USABLE_RANGE;
@@ -79,7 +79,7 @@ void findMaxAmplitudes()
     }
 }
 
-void fillFftBuffer()
+void fillFftBuffer(void)
 {
     uint16_t *sample = currentSample;
     float *fft_buffer_ptr = fft_buffer;
@@ -103,7 +103,7 @@ void fillFftBuffer()
 }
 
 /* \\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\ Interrupt handlers */
-void TIMER1_IRQHandler()
+void TIMER1_IRQHandler(void)
 {
 	// choose interval
 	uint32_t intervalFrequency = frequency;
@@ -129,7 +129,7 @@ void TIMER1_IRQHandler()
     LPC_TIM1->IR = 0xffffffff;
 }
 
-void ADC_IRQHandler()
+void ADC_IRQHandler(void)
 {
     /* Read ADC sample */
     uint32_t adcSampledValue = ADC_ChannelGetData(LPC_ADC, 0);
@@ -150,7 +150,7 @@ void ADC_IRQHandler()
 
 
 /* \\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\ Peripheral configurations */
-void configureAndStartTimer0()
+void configureAndStartTimer0(void)
 {
     /* Turn on power */
     CLKPWR_ConfigPPWR(CLKPWR_PCONP_PCTIM0, ENABLE);
@@ -178,7 +178,7 @@ void configureAndStartTimer0()
     LPC_TIM0->TCR |= BIT(0);
 }
 
-void configureAndStartTimer1()
+void configureAndStartTimer1(void)
 {
     /* Turn on power */
     CLKPWR_ConfigPPWR(CLKPWR_PCONP_PCTIM1,
@@ -204,7 +204,7 @@ void configureAndStartTimer1()
     LPC_TIM1->TCR |= BIT(0);
 }
 
-void configureAndStartADC()
+void configureAndStartADC(void)
 {
     /* Turn on power */
     CLKPWR_ConfigPPWR(CLKPWR_PCONP_PCAD,
@@ -240,7 +240,7 @@ void configureAndStartADC()
     LPC_ADC->ADCR &= ~BIT(24);
 }
 
-void configureAndStartDAC()
+void configureAndStartDAC(void)
 {
     /* Turn on power and configureBoard pin */
     LPC_PINCON->PINSEL1 &= ~(BIT(21) | BIT(20));
@@ -251,7 +251,7 @@ void configureAndStartDAC()
                       CLKPWR_PCLKSEL_CCLK_DIV_4);
 }
 
-void configureAndStartSpeakerAmplifier() {
+void configureAndStartSpeakerAmplifier(void) {
     GPIO_SetDir(0, BIT(27), 1);
     GPIO_SetDir(0, BIT(28), 1);
     GPIO_SetDir(2, BIT(13), 1);
@@ -261,7 +261,7 @@ void configureAndStartSpeakerAmplifier() {
     GPIO_ClearValue(2, BIT(13));	//LM4811-shutdn
 }
 
-static void init_ssp()
+static void init_ssp(void)
 {
     SSP_CFG_Type SSP_ConfigStruct;
     PINSEL_CFG_Type PinCfg;
@@ -291,7 +291,7 @@ static void init_ssp()
 
 }
 
-static void init_i2c()
+static void init_i2c(void)
 {
     PINSEL_CFG_Type PinCfg;
 
@@ -314,14 +314,14 @@ void writeByteToSPI(uint8_t byte) {
     while(!(LPC_SPI->SPSR & BIT(7))) {}
 }
 
-void configureBoard()
+void configureBoard(void)
 {
     configureSystemClock100Mhz();
     configurePeripherials();
     configureInterrupts();
 }
 
-void configurePeripherials()
+void configurePeripherials(void)
 {
     configureAndStartOLED();
     configureAndStartTimer0();
@@ -332,7 +332,7 @@ void configurePeripherials()
     configureJoystick();
 }
 
-void configureInterrupts()
+void configureInterrupts(void)
 {
     /* Enable/Disable NVIC interrupts */
     NVIC->ICER[0] |= BIT(1);		// Disable timer0 interrupts
@@ -340,7 +340,7 @@ void configureInterrupts()
     NVIC->ISER[0] |= BIT(22);		// Enable ADC interrupts
 }
 
-void configureSystemClock100Mhz(){
+void configureSystemClock100Mhz(void){
     LPC_SC->SCS       = BIT(5);				// Enable main oscillator (30)
     while ((LPC_SC->SCS & (BIT(6))) == 0) {}	// Wait for Oscillator to be ready
     LPC_SC->CCLKCFG   =	2;      			// Setup Clock Divider - 3 (57)
@@ -383,7 +383,7 @@ struct{
 	int center;
 } joystickStatus;
 
-void processJoystick(){
+void processJoystick(void){
 	//top
 	int lastTopStatus = joystickStatus.top;
 	int currentTopStatus = !(LPC_GPIO0->FIOPIN & BIT(15));
@@ -431,7 +431,7 @@ void processJoystick(){
 	//set current status
 }
 
-void configureJoystick(){
+void configureJoystick(void){
 	//buttons address
 	//GPIO 0_15, 0_16, 0_17, 2_3, 2_4
 
@@ -444,14 +444,14 @@ void configureJoystick(){
 }
 
 
-void configureAndStartOLED()
+void configureAndStartOLED(void)
 {
     init_ssp();
     init_i2c();
     oled_init();
 }
 
-void runMainProgramLoop()
+void runMainProgramLoop(void)
 {
     while(TRUE)
     {
@@ -531,7 +531,7 @@ void runMainProgramLoop()
 
 
 /* \\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\ AnalyseThatSound */
-int main()
+int main(void)
 {
     configureBoard();
     runMainProgramLoop();
