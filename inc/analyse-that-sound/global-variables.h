@@ -7,7 +7,7 @@
 
 /* \\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\ Global variables */
 /* --------------------------------------------------------- Sine function -- */
-extern          uint16_t sineLookupTable[SINE_LOOKUP_TABLE_SIZE]
+extern          uint16_t sineLookupTable[SINE_LOOKUP_TABLE_SIZE];
 
 
 /* ------------------------------------------------------------------- FFT -- */
