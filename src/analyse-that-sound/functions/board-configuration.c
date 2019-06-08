@@ -183,9 +183,9 @@ void configureAndStartTimer0(void)
     LPC_TIM0->EMR |= BIT(6);
 
     /* Configure interrupts */
-    LPC_TIM0->MR1 = 25000000 / SAMPLE_RATE / 2;		// When counter reaches match register value (8000 Hz)
-    LPC_TIM0->MCR |= BIT(4);						// then reset
-    /* LPC_TIM0->MCR |= BIT(3); */					// then interrupt
+    LPC_TIM0->MR1 = 25000000 / SAMPLE_RATE / 2;     // When counter reaches match register value (8000 Hz)
+    LPC_TIM0->MCR |= BIT(4);                        // then reset
+    /* LPC_TIM0->MCR |= BIT(3); */                  // then interrupt
 
     /* Start */
     LPC_TIM0->TCR |= BIT(0);
@@ -210,9 +210,9 @@ void configureAndStartTimer1(void)
     LPC_TIM1->PR = 0;
 
     /* Configure interrupts */
-    LPC_TIM1->MR1 = 25000000 / 100000;			// When counter reaches match register value (100 000 Hz)
-    LPC_TIM1->MCR |= BIT(4);				// then reset
-    LPC_TIM1->MCR |= BIT(3);				// then interrupt
+    LPC_TIM1->MR1 = 25000000 / 100000;      // When counter reaches match register value (100 000 Hz)
+    LPC_TIM1->MCR |= BIT(4);                // then reset
+    LPC_TIM1->MCR |= BIT(3);                // then interrupt
 
     /* Start */
     LPC_TIM1->TCR |= BIT(0);
@@ -241,7 +241,7 @@ void configureAndStartADC(void)
     LPC_ADC->ADCR |= BIT(0);
 
     /* Select additional clock divisor */
-    LPC_ADC->ADCR |= BIT(8); 		// Other bits are already 0 since reset, clock divisor: 2
+    LPC_ADC->ADCR |= BIT(8);         // Other bits are already 0 since reset, clock divisor: 2
 
     /* Enable interrupts on channel 0 */
     LPC_ADC->ADINTEN |= BIT(0);
@@ -274,9 +274,9 @@ void configureAndStartSpeakerAmplifier(void)
     GPIO_SetDir(0, BIT(28), 1);
     GPIO_SetDir(2, BIT(13), 1);
 
-    GPIO_ClearValue(0, BIT(27));	//LM4811-clk
-    GPIO_ClearValue(0, BIT(28));	//LM4811-up/dn
-    GPIO_ClearValue(2, BIT(13));	//LM4811-shutdn
+    GPIO_ClearValue(0, BIT(27));    //LM4811-clk
+    GPIO_ClearValue(0, BIT(28));    //LM4811-up/dn
+    GPIO_ClearValue(2, BIT(13));    //LM4811-shutdn
 }
 
 static
@@ -284,10 +284,10 @@ void configureJoystick(void)
 {
     /* Set pins' directions to input */
     LPC_GPIO0->FIODIR &= ~BIT(15);  /* top    */      /* [@user-manual:9.5.1] */
-    LPC_GPIO2->FIODIR &= ~BIT(3);	/* bottom */      /* [@user-manual:9.5.1] */
-    LPC_GPIO0->FIODIR &= ~BIT(16);	/* left   */      /* [@user-manual:9.5.1] */
-    LPC_GPIO2->FIODIR &= ~BIT(4);	/* right  */      /* [@user-manual:9.5.1] */
-    LPC_GPIO0->FIODIR &= ~BIT(17);	/* center */      /* [@user-manual:9.5.1] */
+    LPC_GPIO2->FIODIR &= ~BIT(3);   /* bottom */      /* [@user-manual:9.5.1] */
+    LPC_GPIO0->FIODIR &= ~BIT(16);  /* left   */      /* [@user-manual:9.5.1] */
+    LPC_GPIO2->FIODIR &= ~BIT(4);   /* right  */      /* [@user-manual:9.5.1] */
+    LPC_GPIO0->FIODIR &= ~BIT(17);  /* center */      /* [@user-manual:9.5.1] */
 }
 
 static

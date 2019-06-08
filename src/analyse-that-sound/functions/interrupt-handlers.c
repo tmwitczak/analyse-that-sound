@@ -30,7 +30,7 @@ void TIMER1_IRQHandler(void)
 
 
     //generate pure tone using dac
-    int step = 100000 / intervalFrequency;	//na przestrzeni tylu przerwan musimy zrobic caly okres
+    int step = 100000 / intervalFrequency;    //na przestrzeni tylu przerwan musimy zrobic caly okres
     int sinPhase = dacIterator * SINE_LOOKUP_TABLE_SIZE / step;
     dacIterator = (dacIterator + 1) % step;
 

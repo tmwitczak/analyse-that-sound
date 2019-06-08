@@ -24,9 +24,9 @@ uint16_t sineLookupTable[SINE_LOOKUP_TABLE_SIZE]
 
 
 /* ------------------------------------------------------------------- FFT -- */
-volatile int      frequency = 500;
-volatile int	  interval = 0;
-volatile int	  volume = 100;
+volatile int      frequency   = 500;
+volatile int      interval    = 0;
+volatile int      volume      = 100;
 volatile int      graphStatus = OLED_DISPLAY_MODE_FFT_GRAPH;
 
 volatile int16_t  sampleBuffer[FFT_POINTS_NUMBER];
@@ -34,7 +34,7 @@ volatile int16_t  *currentSample = sampleBuffer;
 
 volatile float    fft_buffer[FFT_BUFFER_SIZE];
 volatile float    amplitude[FFT_POINTS_NUMBER];
-volatile float	  averagedAmplitude[OLED_DISPLAY_WIDTH];
+volatile float    averagedAmplitude[OLED_DISPLAY_WIDTH];
 volatile uint8_t  normalizedAmplitude[OLED_DISPLAY_WIDTH];
 volatile uint16_t averagedAmplitudeMaxIndex = 0;
 volatile uint16_t amplitudeMaxIndex = 0;
