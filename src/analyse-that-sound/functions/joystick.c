@@ -50,33 +50,41 @@ void updateJoystickStatus(void)
 void handleJoystickEvents(void)
 {
     // Volume adjustment | Top/Bottom
-    if (isJoystickDirectionToggledOn(&joystick.top))
+    if (isJoystickDirectionToggledOn(&joystick.top) == TRUE)
     {
         if (volume > 0)
+        {
             volume -= 10;
+        }
     }
 
-    if (isJoystickDirectionToggledOn(&joystick.bottom))
+    if (isJoystickDirectionToggledOn(&joystick.bottom) == TRUE)
     {
         if (volume < 100)
+        {
             volume += 10;
+        }
     }
 
     // Interval adjustment | Left/Right
-    if (isJoystickDirectionToggledOn(&joystick.right))
+    if (isJoystickDirectionToggledOn(&joystick.right) == TRUE)
     {
         if (interval > 0)
+        {
             interval -= 1;
+        }
     }
 
-    if (isJoystickDirectionToggledOn(&joystick.left))
+    if (isJoystickDirectionToggledOn(&joystick.left) == TRUE)
     {
         if (interval < 11)
+        {
             interval += 1;
+        }
     }
 
     // OLED display mode adjustment | Center
-    if (isJoystickDirectionToggledOn(&joystick.center))
+    if (isJoystickDirectionToggledOn(&joystick.center) == TRUE)
     {
         graphStatus = (graphStatus + 1) % 2;
     }

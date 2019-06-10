@@ -72,9 +72,9 @@ void zeroUnusedAmplitudes(void)
 void averageAmplitudes(void)
 {
     float sumOfAmplitudes = 0;
+    int averagedAmplitudeIndex = 0;
 
-    for (int amplitudeIndex = 0,
-             averagedAmplitudeIndex = 0;
+    for (int amplitudeIndex = 0;
          amplitudeIndex < FFT_AMPLITUDE_USABLE_RANGE;
          ++amplitudeIndex)
     {
@@ -95,7 +95,9 @@ void averageAmplitudes(void)
 
 void findMaxAmplitudes(void)
 {
-    for(int i = 0;
+    int i = 0;
+
+    for(i = 0;
         i < FFT_AMPLITUDE_USABLE_RANGE;
         ++i)
     {
@@ -105,7 +107,7 @@ void findMaxAmplitudes(void)
         }
     }
 
-    for(int i = 0;
+    for(i = 0;
         i < OLED_DISPLAY_WIDTH;
         ++i)
     {

@@ -69,9 +69,9 @@ void configureSystemClock(void)
     uint16_t M = 25u;
     uint16_t N = 2u;
 
-    LPC_SC->PLL0CFG = ((N - (uint16_t)1)              /* [@user-manual:4.5.4] */
-                       << (uint16_t)16)
-                      | (M - (uint16_t)1);
+    LPC_SC->PLL0CFG = ((N - (uint16_t)1u)              /* [@user-manual:4.5.4] */
+                       << (uint16_t)16u)
+                      | (M - (uint16_t)1u);
 
     LPC_SC->PLL0FEED = 0xAA;                          /* [@user-manual:4.5.8] */
     LPC_SC->PLL0FEED = 0x55;                          /* [@user-manual:4.5.8] */

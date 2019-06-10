@@ -12,7 +12,7 @@
 /* \\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\ Main program loop */
 void runMainProgramLoop(void)
 {
-    while(TRUE)
+    while(TRUE == TRUE)
     {
         doFftComputations();
 

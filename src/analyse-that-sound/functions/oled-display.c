@@ -54,7 +54,7 @@ void drawFftGraph(void)
             }
             else
             {
-                writeData(((uint8_t)00));
+                writeData(((uint8_t)0));
             }
         }
     }
