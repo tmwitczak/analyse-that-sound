@@ -21,6 +21,10 @@
 #include <oled.h>
 
 
+/* \\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\ Constants */
+#define TIMER_CLOCK_FREQUENCY 25000000
+
+
 /* \\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\ Board configuration */
 void configureBoard(void)
 {
@@ -184,10 +188,16 @@ void configureAndStartTimer0(void)
     LPC_TIM0->EMR |= BIT(7);                        /* [@user-manual:21.6.11] */
     LPC_TIM0->EMR |= BIT(6);                        /* [@user-manual:21.6.11] */
 
-    /* Configure interrupts */
-    LPC_TIM0->MR1 = 25000000 / SAMPLE_RATE / 2;     // When counter reaches match register value (8000 Hz)
-    LPC_TIM0->MCR |= BIT(4);                        // then reset
-    /* LPC_TIM0->MCR |= BIT(3); */                  // then interrupt
+    /* Configure interrupts
+       > When counter reaches match register value... */
+    LPC_TIM0->MR1 = TIMER_CLOCK_FREQUENCY            /* [@user-manual:21.6.7] */
+                    / (2 * SAMPLE_RATE);
+
+    /* > ...reset... */
+    LPC_TIM0->MCR |= BIT(4);                         /* [@user-manual:21.6.8] */ 
+    
+    /* > ...and then interrupt. */
+    /* LPC_TIM0->MCR |= BIT(3); */                   /* [@user-manual:21.6.8] */
 
     /* Start */
     LPC_TIM0->TCR |= BIT(0);                         /* [@user-manual:21.6.2] */
@@ -211,10 +221,16 @@ void configureAndStartTimer1(void)
     /* Set prescaler */
     LPC_TIM1->PR = 0;
 
-    /* Configure interrupts */
-    LPC_TIM1->MR1 = 25000000 / 100000;      // When counter reaches match register value (100 000 Hz)
-    LPC_TIM1->MCR |= BIT(4);                // then reset
-    LPC_TIM1->MCR |= BIT(3);                // then interrupt
+    /* Configure interrupts
+       > When counter reaches match register value */
+    LPC_TIM1->MR1 = TIMER_CLOCK_FREQUENCY            /* [@user-manual:21.6.7] */
+                    / 100000;
+
+    /* > ...reset... */
+    LPC_TIM1->MCR |= BIT(4);                         /* [@user-manual:21.6.8] */
+
+    /* > ...and then interrupt. */
+    LPC_TIM1->MCR |= BIT(3);                         /* [@user-manual:21.6.8] */
 
     /* Start */
     LPC_TIM1->TCR |= BIT(0);                         /* [@user-manual:21.6.2] */
