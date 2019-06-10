@@ -170,7 +170,8 @@ void configureAndStartTimer0(void)
                       ENABLE);
 
     /* Select clock divisor */
-    CLKPWR_SetPCLKDiv(CLKPWR_PCLKSEL_TIMER0, CLKPWR_PCLKSEL_CCLK_DIV_4);
+    CLKPWR_SetPCLKDiv(CLKPWR_PCLKSEL_TIMER0,          /* [@user-manual:4.7.3] */
+                      CLKPWR_PCLKSEL_CCLK_DIV_4);
 
     /* Reset counters */
     LPC_TIM0->TCR |= BIT(1);
@@ -200,7 +201,7 @@ void configureAndStartTimer1(void)
                       ENABLE);
 
     /* Select clock divisor */
-    CLKPWR_SetPCLKDiv(CLKPWR_PCLKSEL_TIMER1,
+    CLKPWR_SetPCLKDiv(CLKPWR_PCLKSEL_TIMER1,          /* [@user-manual:4.7.3] */
                       CLKPWR_PCLKSEL_CCLK_DIV_4);
 
     /* Reset counters */
@@ -227,7 +228,7 @@ void configureAndStartADC(void)
                       ENABLE);
 
     /* Select clock divisor */
-    CLKPWR_SetPCLKDiv(CLKPWR_PCLKSEL_ADC,
+    CLKPWR_SetPCLKDiv(CLKPWR_PCLKSEL_ADC,             /* [@user-manual:4.7.3] */
                       CLKPWR_PCLKSEL_CCLK_DIV_4);
 
     /* Confiugre pin */
@@ -264,7 +265,7 @@ void configureAndStartDAC(void)
     LPC_PINCON->PINSEL1 |= BIT(21);
 
     /* Select clock divisor */
-    CLKPWR_SetPCLKDiv(CLKPWR_PCLKSEL_DAC,
+    CLKPWR_SetPCLKDiv(CLKPWR_PCLKSEL_DAC,             /* [@user-manual:4.7.3] */
                       CLKPWR_PCLKSEL_CCLK_DIV_4);
 }
 
