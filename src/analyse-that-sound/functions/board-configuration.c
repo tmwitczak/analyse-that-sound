@@ -263,7 +263,6 @@ void configureAndStartADC(void)
        > Set clock divisor: 2 */
     LPC_ADC->ADCR |= BIT(8);                         /* [@user-manual:29.5.1] */
 
-
     /* Enable interrupts on channel 0 */
     LPC_ADC->ADINTEN |= BIT(0);                      /* [@user-manual:29.5.3] */
 
