@@ -18,20 +18,28 @@
 
 #include <oled.h>
 
+
 /* \\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\ Interrupt handlers */
 void TIMER1_IRQHandler(void)
 {
-    // choose interval
+    /* Choose interval */
     uint32_t intervalFrequency = frequency;
-    for (int i = 0; i < interval; i++)
+    for (int i = 0;
+         i < interval;
+         ++i)
     {
-        intervalFrequency = intervalFrequency * SEMITONE_RATIO_NUMERATOR / SEMITONE_RATIO_DENOMINATOR;
+        intervalFrequency = intervalFrequency * SEMITONE_RATIO_NUMERATOR
+                            / SEMITONE_RATIO_DENOMINATOR;
     }
 
 
-    //generate pure tone using dac
-    int step = 100000 / intervalFrequency;    //na przestrzeni tylu przerwan musimy zrobic caly okres
-    int sinPhase = dacIterator * SINE_LOOKUP_TABLE_SIZE / step;
+    /* Generate pure tone with DAC */
+    int step = SINE_DAC_FREQUENCY       /* over that many interrupts we
+               / intervalFrequency;        must do the whole iteration  */
+
+    int sinPhase = dacIterator * SINE_LOOKUP_TABLE_SIZE
+                   / step;
+
     dacIterator = (dacIterator + 1) % step;
 
     if(sinPhase >= SINE_LOOKUP_TABLE_SIZE)
@@ -39,7 +47,8 @@ void TIMER1_IRQHandler(void)
         sinPhase = SINE_LOOKUP_TABLE_SIZE - 1;
     }
 
-    DAC_UpdateValue(LPC_DAC, sineLookupTable[sinPhase] * volume / 100);
+    DAC_UpdateValue(LPC_DAC, sineLookupTable[sinPhase] * volume
+                             / 100);
 
     /* Clear interrupt status */
     LPC_TIM1->IR = 0xffffffff;
@@ -63,3 +72,6 @@ void ADC_IRQHandler(void)
     /* Clear interrupt status */
     uint32_t unused = LPC_ADC->ADGDR;
 }
+
+
+/* \\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\ */

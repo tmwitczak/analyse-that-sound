@@ -224,7 +224,7 @@ void configureAndStartTimer1(void)
     /* Configure interrupts
        > When counter reaches match register value */
     LPC_TIM1->MR1 = TIMER_CLOCK_FREQUENCY            /* [@user-manual:21.6.7] */
-                    / 100000;
+                    / SINE_DAC_FREQUENCY;
 
     /* > ...reset... */
     LPC_TIM1->MCR |= BIT(4);                         /* [@user-manual:21.6.8] */

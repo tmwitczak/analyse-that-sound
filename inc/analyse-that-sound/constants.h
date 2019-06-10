@@ -26,6 +26,7 @@
 
 /* ---------------------------------------------- Sine function parameters -- */
 #define SINE_LOOKUP_TABLE_SIZE 128
+#define SINE_DAC_FREQUENCY     100000
 
 /* ----------------------------------------------------- OLED display mode -- */
 #define NUMBER_OF_OLED_DISPLAY_MODES 2
