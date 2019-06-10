@@ -23,3 +23,7 @@ Project for Embedded Systems course at Lodz University of Technology
 - Lib_EaBase Board
 - Lib_CMSISv1p30_LPC17xx
       (from demo programs downloaded from course site)
+
+### MISRA-C:2012 compliance
+
+http://my.ldrasoftware.co.uk/repository//miscellaneous/Misra-c_2012_compliance.pdf
