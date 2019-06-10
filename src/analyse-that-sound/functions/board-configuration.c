@@ -252,25 +252,28 @@ void configureAndStartADC(void)
     LPC_PINCON->PINSEL1 |= BIT(14);                   /* [@user-manual:8.5.2] */
 
     /* Reset ADCR */
-    LPC_ADC->ADCR = 0;
-    LPC_ADC->ADCR |= BIT(21);
+    LPC_ADC->ADCR = 0;                               /* [@user-manual:29.5.1] */
+    LPC_ADC->ADCR |= BIT(21);                        /* [@user-manual:29.5.1] */
 
     /* Select channel */
-    LPC_ADC->ADCR |= BIT(0);
+    LPC_ADC->ADCR |= BIT(0);                         /* [@user-manual:29.5.1] */
 
-    /* Select additional clock divisor */
-    LPC_ADC->ADCR |= BIT(8);         // Other bits are already 0 since reset, clock divisor: 2
+    /* Select additional clock divisor
+       > Other bits are already 0 since reset
+       > Set clock divisor: 2 */
+    LPC_ADC->ADCR |= BIT(8);                         /* [@user-manual:29.5.1] */
+
 
     /* Enable interrupts on channel 0 */
     LPC_ADC->ADINTEN |= BIT(0);
 
     /* Disable burst mode */
-    LPC_ADC->ADCR &= ~BIT(16);
+    LPC_ADC->ADCR &= ~BIT(16);                       /* [@user-manual:29.5.1] */
 
     /* Start conversion when edge occurs on MAT0.1 */
-    LPC_ADC->ADCR |= BIT(26);
-    LPC_ADC->ADCR &= ~BIT(25);
-    LPC_ADC->ADCR &= ~BIT(24);
+    LPC_ADC->ADCR |= BIT(26);                        /* [@user-manual:29.5.1] */
+    LPC_ADC->ADCR &= ~BIT(25);                       /* [@user-manual:29.5.1] */
+    LPC_ADC->ADCR &= ~BIT(24);                       /* [@user-manual:29.5.1] */
 }
 
 static
