@@ -21,6 +21,7 @@
 #include <oled.h>
 
 
+/* \\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\ Joystick */
 void updateJoystickDirectionStatus(JoystickDirection *joystickDirection,
                                    LPC_GPIO_TypeDef *gpio,
                                    int bit)
@@ -80,3 +81,6 @@ void handleJoystickEvents(void)
         graphStatus = (graphStatus + 1) % 2;
     }
 }
+
+
+/* \\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\ */
