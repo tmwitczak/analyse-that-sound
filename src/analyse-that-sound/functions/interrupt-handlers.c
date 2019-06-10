@@ -34,8 +34,8 @@ void TIMER1_IRQHandler(void)
 
 
     /* Generate pure tone with DAC */
-    int step = SINE_DAC_FREQUENCY       /* over that many interrupts we
-               / intervalFrequency;        must do the whole iteration  */
+    int step = SINE_DAC_FREQUENCY       /* over that many interrupts we */
+               / intervalFrequency;     /* must do the whole iteration  */
 
     int sinPhase = dacIterator * SINE_LOOKUP_TABLE_SIZE
                    / step;
