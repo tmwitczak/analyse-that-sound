@@ -248,8 +248,8 @@ void configureAndStartADC(void)
                       CLKPWR_PCLKSEL_CCLK_DIV_4);
 
     /* Confiugre pin */
-    LPC_PINCON->PINSEL1 &= ~(BIT(14) | BIT(15));
-    LPC_PINCON->PINSEL1 |= BIT(14);
+    LPC_PINCON->PINSEL1 &= ~(BIT(14) | BIT(15));      /* [@user-manual:8.5.2] */
+    LPC_PINCON->PINSEL1 |= BIT(14);                   /* [@user-manual:8.5.2] */
 
     /* Reset ADCR */
     LPC_ADC->ADCR = 0;
@@ -277,8 +277,8 @@ static
 void configureAndStartDAC(void)
 {
     /* Turn on power and configureBoard pin */
-    LPC_PINCON->PINSEL1 &= ~(BIT(21) | BIT(20));
-    LPC_PINCON->PINSEL1 |= BIT(21);
+    LPC_PINCON->PINSEL1 &= ~(BIT(21) | BIT(20));      /* [@user-manual:8.5.2] */
+    LPC_PINCON->PINSEL1 |= BIT(21);                   /* [@user-manual:8.5.2] */
 
     /* Select clock divisor */
     CLKPWR_SetPCLKDiv(CLKPWR_PCLKSEL_DAC,             /* [@user-manual:4.7.3] */
