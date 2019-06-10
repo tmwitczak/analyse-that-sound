@@ -21,7 +21,54 @@
 #include <oled.h>
 
 
-/* ------------------------------------------------------------------- FFT -- */
+/* \\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\ FFT operations */
+void doFftComputations(void)
+{
+    fillFftBuffer();
+    computeFft();
+
+    zeroUnusedAmplitudes();
+    averageAmplitudes();
+    findMaxAmplitudes();
+    normalizeAmplitudes();
+
+    findFundamentalFrequency();
+}
+
+void fillFftBuffer(void)
+{
+    uint16_t *sample = currentSample;
+    float *fft_buffer_ptr = fft_buffer;
+
+    memset(fft_buffer, 0, (int)sizeof(float) * FFT_POINTS_NUMBER * 2);
+
+    for(int i = 0;
+        i < FFT_POINTS_NUMBER;
+        ++i)
+    {
+        *fft_buffer_ptr = (*sample);
+
+        sample += 1;
+        fft_buffer_ptr += 2;
+
+        if (sample == (sampleBuffer + FFT_POINTS_NUMBER))
+        {
+            sample = sampleBuffer;
+        }
+    }
+}
+
+void computeFft(void)
+{
+    arm_cfft_f32(&arm_cfft_sR_f32_len1024, fft_buffer, 0, 1);
+    arm_cmplx_mag_f32(fft_buffer, amplitude, FFT_POINTS_NUMBER);
+}
+
+void zeroUnusedAmplitudes(void)
+{
+    amplitude[0] = 0;
+}
+
 void averageAmplitudes(void)
 {
     float sumOfAmplitudes = 0;
@@ -43,19 +90,6 @@ void averageAmplitudes(void)
             averagedAmplitudeIndex++;
             sumOfAmplitudes = 0;
         }
-    }
-}
-
-void normalizeAmplitudes(void)
-{
-    for (int i = 0;
-         i < OLED_DISPLAY_WIDTH;
-         ++i)
-    {
-        normalizedAmplitude[i]
-                = averagedAmplitude[i]
-                  / averagedAmplitude[averagedAmplitudeMaxIndex]
-                    * OLED_DISPLAY_HEIGHT;
     }
 }
 
@@ -82,26 +116,16 @@ void findMaxAmplitudes(void)
     }
 }
 
-void fillFftBuffer(void)
+void normalizeAmplitudes(void)
 {
-    uint16_t *sample = currentSample;
-    float *fft_buffer_ptr = fft_buffer;
-
-    memset(fft_buffer, 0, (int)sizeof(float) * FFT_POINTS_NUMBER * 2);
-
-    for(int i = 0;
-        i < FFT_POINTS_NUMBER;
-        ++i)
+    for (int i = 0;
+         i < OLED_DISPLAY_WIDTH;
+         ++i)
     {
-        *fft_buffer_ptr = (*sample);
-
-        sample += 1;
-        fft_buffer_ptr += 2;
-
-        if (sample == (sampleBuffer + FFT_POINTS_NUMBER))
-        {
-            sample = sampleBuffer;
-        }
+        normalizedAmplitude[i]
+                = averagedAmplitude[i]
+                  / averagedAmplitude[averagedAmplitudeMaxIndex]
+                    * OLED_DISPLAY_HEIGHT;
     }
 }
 
@@ -111,26 +135,5 @@ void findFundamentalFrequency(void)
                 / (uint16_t)FFT_POINTS_NUMBER;
 }
 
-void zeroUnusedAmplitudes(void)
-{
-    amplitude[0] = 0;
-}
 
-void computeFft(void)
-{
-    arm_cfft_f32(&arm_cfft_sR_f32_len1024, fft_buffer, 0, 1);
-    arm_cmplx_mag_f32(fft_buffer, amplitude, FFT_POINTS_NUMBER);
-}
-
-void doFftComputations(void)
-{
-    fillFftBuffer();
-    computeFft();
-
-    zeroUnusedAmplitudes();
-    averageAmplitudes();
-    findMaxAmplitudes();
-    normalizeAmplitudes();
-
-    findFundamentalFrequency();
-}
+/* \\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\ */
