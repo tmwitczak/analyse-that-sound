@@ -23,16 +23,19 @@
 #include <oled.h>
 
 
+/* \\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\ OLED display */
 void drawFftGraph(void)
 {
     for (int page = 7;
          page >= 0;
          --page)
     {
-        writeCommand(0xb0 + page); //page number
-        // start column = 18 = 0x12
-        writeCommand(0x02); //start column low 2
-        writeCommand(0x11); //start column high 1
+        /* Page number */
+        writeCommand(0xb0 + page); 
+
+        /* Start column | 18 = 0x12 */
+        writeCommand(0x02);             /* low 2 */
+        writeCommand(0x11);             /* high 1 */
 
         for (int column = 0;
              column < OLED_DISPLAY_WIDTH;
@@ -56,21 +59,44 @@ void drawFftGraph(void)
         }
     }
 }
+
 void drawFftStatistics(void)
 {
+    /* Prepare buffers */
     char stringFrequencyBuff[10];
     char stringVolumeBuff[10];
     char stringIntervalBuff[10];
 
+    /* Convert numerical values to strings */
     intToString(frequency, stringFrequencyBuff, 10, 10);
-    intToString(volume, stringVolumeBuff, 10, 10);
-    intToString(interval, stringIntervalBuff, 10, 10);
+    intToString(volume,    stringVolumeBuff,    10, 10);
+    intToString(interval,  stringIntervalBuff,  10, 10);
 
-    //oled_clearScreen(OLED_COLOR_BLACK);
-    oled_putString(0, 0, "frequency:", OLED_COLOR_WHITE, OLED_COLOR_BLACK);
-    oled_putString(0, 10, "interval:", OLED_COLOR_WHITE, OLED_COLOR_BLACK);
-    oled_putString(0, 20, "volume:", OLED_COLOR_WHITE, OLED_COLOR_BLACK);
-    oled_putString(60, 0, stringFrequencyBuff, OLED_COLOR_WHITE, OLED_COLOR_BLACK);
-    oled_putString(60, 10, stringIntervalBuff, OLED_COLOR_WHITE, OLED_COLOR_BLACK);
-    oled_putString(60, 20, stringVolumeBuff, OLED_COLOR_WHITE, OLED_COLOR_BLACK);
+    /* Display information on OLED */
+    oled_putString(0, 0,
+                   "frequency:",
+                   OLED_COLOR_WHITE, OLED_COLOR_BLACK);
+
+    oled_putString(0, 10,
+                   "interval:",
+                   OLED_COLOR_WHITE, OLED_COLOR_BLACK);
+
+    oled_putString(0, 20,
+                   "volume:",
+                   OLED_COLOR_WHITE, OLED_COLOR_BLACK);
+
+    oled_putString(60, 0,
+                   stringFrequencyBuff,
+                   OLED_COLOR_WHITE, OLED_COLOR_BLACK);
+                   
+    oled_putString(60, 10,
+                   stringIntervalBuff,
+                   OLED_COLOR_WHITE, OLED_COLOR_BLACK);
+
+    oled_putString(60, 20,
+                   stringVolumeBuff,
+                   OLED_COLOR_WHITE, OLED_COLOR_BLACK);
 }
+
+
+/* \\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\ */
