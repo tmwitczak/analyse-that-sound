@@ -166,7 +166,8 @@ static
 void configureAndStartTimer0(void)
 {
     /* Turn on power */
-    CLKPWR_ConfigPPWR(CLKPWR_PCONP_PCTIM0, ENABLE);
+    CLKPWR_ConfigPPWR(CLKPWR_PCONP_PCTIM0,            /* [@user-manual:4.8.9] */
+                      ENABLE);
 
     /* Select clock divisor */
     CLKPWR_SetPCLKDiv(CLKPWR_PCLKSEL_TIMER0, CLKPWR_PCLKSEL_CCLK_DIV_4);
@@ -195,7 +196,7 @@ static
 void configureAndStartTimer1(void)
 {
     /* Turn on power */
-    CLKPWR_ConfigPPWR(CLKPWR_PCONP_PCTIM1,
+    CLKPWR_ConfigPPWR(CLKPWR_PCONP_PCTIM1,            /* [@user-manual:4.8.9] */
                       ENABLE);
 
     /* Select clock divisor */
@@ -222,7 +223,7 @@ static
 void configureAndStartADC(void)
 {
     /* Turn on power */
-    CLKPWR_ConfigPPWR(CLKPWR_PCONP_PCAD,
+    CLKPWR_ConfigPPWR(CLKPWR_PCONP_PCAD,              /* [@user-manual:4.8.9] */
                       ENABLE);
 
     /* Select clock divisor */
