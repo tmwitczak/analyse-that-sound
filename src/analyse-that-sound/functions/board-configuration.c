@@ -265,7 +265,7 @@ void configureAndStartADC(void)
 
 
     /* Enable interrupts on channel 0 */
-    LPC_ADC->ADINTEN |= BIT(0);
+    LPC_ADC->ADINTEN |= BIT(0);                      /* [@user-manual:29.5.3] */
 
     /* Disable burst mode */
     LPC_ADC->ADCR &= ~BIT(16);                       /* [@user-manual:29.5.1] */
