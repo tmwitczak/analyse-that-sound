@@ -182,7 +182,7 @@ void configureAndStartTimer0(void)
     LPC_TIM0->TCR &= ~BIT(1);                        /* [@user-manual:21.6.2] */
 
     /* Set prescaler */
-    LPC_TIM0->PR = 0;
+    LPC_TIM0->PR = 0;                                /* [@user-manual:21.6.5] */
 
     /* Configure external match for MAT0.1 */
     LPC_TIM0->EMR |= BIT(7);                        /* [@user-manual:21.6.11] */
@@ -219,7 +219,7 @@ void configureAndStartTimer1(void)
     LPC_TIM1->TCR &= ~BIT(1);                        /* [@user-manual:21.6.2] */
 
     /* Set prescaler */
-    LPC_TIM1->PR = 0;
+    LPC_TIM1->PR = 0;                                /* [@user-manual:21.6.5] */
 
     /* Configure interrupts
        > When counter reaches match register value */
