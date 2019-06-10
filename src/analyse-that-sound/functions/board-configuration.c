@@ -290,17 +290,24 @@ void configureAndStartDAC(void)
 static
 void configureAndStartSpeakerAmplifier(void)
 {
+    /* Set pin direction
+       > LM4811-clk */
     GPIO_SetDir(0, BIT(27), 1);                       /* [@user-manual:9.5.1] */
-    GPIO_SetDir(0, BIT(28), 1);                       /* [@user-manual:9.5.1] */
-    GPIO_SetDir(2, BIT(13), 1);                       /* [@user-manual:9.5.1] */
 
-    /* LM4811-clk */
+    /* > LM4811-up/dn */
+    GPIO_SetDir(0, BIT(28), 1);                       /* [@user-manual:9.5.1] */
+
+    /* > LM4811-shutdn */
+    GPIO_SetDir(2, BIT(13), 1);                       /* [@user-manual:9.5.1] */
+    
+    /* Set pin value
+       > LM4811-clk */
     GPIO_ClearValue(0, BIT(27));                      /* [@user-manual:9.5.3] */
 
-    /* LM4811-up/dn */
+    /* > LM4811-up/dn */
     GPIO_ClearValue(0, BIT(28));                      /* [@user-manual:9.5.3] */
 
-    /* LM4811-shutdn */
+    /* > LM4811-shutdn */
     GPIO_ClearValue(2, BIT(13));                      /* [@user-manual:9.5.3] */
 }
 
