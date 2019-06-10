@@ -181,8 +181,8 @@ void configureAndStartTimer0(void)
     LPC_TIM0->PR = 0;
 
     /* Configure external match for MAT0.1 */
-    LPC_TIM0->EMR |= BIT(7);
-    LPC_TIM0->EMR |= BIT(6);
+    LPC_TIM0->EMR |= BIT(7);                        /* [@user-manual:21.6.11] */
+    LPC_TIM0->EMR |= BIT(6);                        /* [@user-manual:21.6.11] */
 
     /* Configure interrupts */
     LPC_TIM0->MR1 = 25000000 / SAMPLE_RATE / 2;     // When counter reaches match register value (8000 Hz)
