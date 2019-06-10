@@ -174,8 +174,8 @@ void configureAndStartTimer0(void)
                       CLKPWR_PCLKSEL_CCLK_DIV_4);
 
     /* Reset counters */
-    LPC_TIM0->TCR |= BIT(1);
-    LPC_TIM0->TCR &= ~BIT(1);
+    LPC_TIM0->TCR |= BIT(1);                         /* [@user-manual:21.6.2] */
+    LPC_TIM0->TCR &= ~BIT(1);                        /* [@user-manual:21.6.2] */
 
     /* Set prescaler */
     LPC_TIM0->PR = 0;
@@ -190,7 +190,7 @@ void configureAndStartTimer0(void)
     /* LPC_TIM0->MCR |= BIT(3); */                  // then interrupt
 
     /* Start */
-    LPC_TIM0->TCR |= BIT(0);
+    LPC_TIM0->TCR |= BIT(0);                         /* [@user-manual:21.6.2] */
 }
 
 static
@@ -205,8 +205,8 @@ void configureAndStartTimer1(void)
                       CLKPWR_PCLKSEL_CCLK_DIV_4);
 
     /* Reset counters */
-    LPC_TIM1->TCR |= BIT(1);
-    LPC_TIM1->TCR &= ~BIT(1);
+    LPC_TIM1->TCR |= BIT(1);                         /* [@user-manual:21.6.2] */
+    LPC_TIM1->TCR &= ~BIT(1);                        /* [@user-manual:21.6.2] */
 
     /* Set prescaler */
     LPC_TIM1->PR = 0;
@@ -217,7 +217,7 @@ void configureAndStartTimer1(void)
     LPC_TIM1->MCR |= BIT(3);                // then interrupt
 
     /* Start */
-    LPC_TIM1->TCR |= BIT(0);
+    LPC_TIM1->TCR |= BIT(0);                         /* [@user-manual:21.6.2] */
 }
 
 static
