@@ -1,0 +1,16 @@
+\subsection{DAC}
+    
+\paragraph{Opis funkcjonalności}
+
+    Konwerter wykonujący 10-bitową konwersję danych w postaci cyfrowej
+    do postaci analogowej.
+
+\paragraph{Konfiguracja}
+
+    Urządzenie ma stałe zasilanie. W celu włączenia konwertera ustawiamy
+    funkcję pinu P0.26 na AOUT poprzez wpisanie do bitów 21 i 20
+    rejestru PINSEL1 wartości najpierw kolejno 0 i 0, a potem do bitu
+    21 wartości 1.
+
+    Aby ustawić dzielnik zegara na 4, wpisujemy do bitów 23 i 22
+    rejestru PCLKSEL0 kolejno wartości 0 i 0.

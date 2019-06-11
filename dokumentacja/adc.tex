@@ -1,0 +1,48 @@
+\subsection{ADC}
+
+    \paragraph{Opis funkcjonalności}
+
+        Konwerter wykonujący 12-bitową aproksymację sygnału analogowego do
+        postaci cyfrowej. 
+
+\paragraph{Konfiguracja}
+
+    Po resecie domyślnie ADC jest wyłączony.
+
+    W celu dostarczenia zasilania do urządzenia, najpierw w rejestrze
+    PCONP ustawiamy bit 12 na 1. Konwerter nie jest jeszcze w stanie
+    operacyjnym.
+
+    Aby ustawić dzielnik zegara na 4, wpisujemy do bitów 24 i 25
+    rejestru PCLKSEL0 kolejno wartości 0 i 0.
+
+    Następnie ustawiamy funkcję pinu P0.23 na AD0.0 poprzez wpisanie
+    do bitów 14 i 15 rejestru PINSEL1 kolejno wartości 0 i 0, a potem
+    do bitu 14 wartości 1.
+
+    Kolejnym krokiem jest reset konwertera poprzez wyzerowanie rejestru
+    AD0CR, a potem faktyczne włączenie urządzenia poprzez ustawienie
+    bitu 21 na wartość 1.
+
+    Wybieramy, z których pinów (AD0.7:0) będą próbkowane i konwertowane
+    wartości sygnału. W celu wykonywania konwersji na ustawionym
+    wcześniej pinie P0.23, w rejestrze AD0CR ustawiamy bit 0 na wartość
+    1.
+
+    Zegar dla konwertera nie powinien przekraczać wartości
+    częstotliwości 13 MHz, jednakże częstotliwość dostarczana
+    od procesora, po uwzględnieniu dzielenia przez 4, to 25 MHz.
+    W celu ustawienia dodatkowego dzielnika zegara dla ADC na wartość 2
+    i osiągnięcia w ten sposób taktowania zgodnego z wymaganym
+    przedziałem, do bitu 8 rejestru AD0CR wpisujemy 1. 
+
+    Uruchomianie przerwań po wykonaniu konwersji uzyskujemy poprzez
+    ustawienie na wartość 1 bitu 8 rejestru AD0INTEN.
+
+    Częstotliwość próbkowania sygnału określamy przy użyciu TIMER0.
+    Powiązanie tych dwóch urządzeń następuje przy wykorzystaniu pinu
+    MAT0.1. W tym celu najpierw jawnie wyłączamy wykorzystanie trybu
+    BURST konwertera poprzez ustawienie bitu 16 rejestru AD0CR na
+    wartość 0. Aby konwersja została uruchomiona w momencie wystąpienia
+    narastającego zbocza, ustawiamy w rejestrze AD0CR bity 26, 25
+    i 24 kolejno na wartości 1, 0 i 0.
