@@ -50,3 +50,11 @@
 	Następnie ustawiamy pin P0.6 w stan niski przed przesyłem,
 	natomiast po wysłaniu danych na interfejs - ustawiamy go na
 	stan wysoki (analogiczne operacje na bitach jak wyżej).
+
+	W trakcie inicjalizacji wyświetlacza OLED ustawiane są piny:
+	P2.1, P2.7 i P0.6 - na stan wyjściowy (FIO[X]DIR, bit [Y]
+	ustawiany na 1; P[X].[Y]). Pin P2.1 jest używany jako kontroler
+	zasilania: przed inicjalizacją jest ustawiany na stan niski
+	w celu wyłączenia zasilania, natomiast po - stan wysoki,
+	zasilanie włączone.
+
