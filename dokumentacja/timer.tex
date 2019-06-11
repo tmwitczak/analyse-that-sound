@@ -1,0 +1,35 @@
+\subsection{Timery}
+Wykorzystane zostały dwa timery: Timer 0 i Timer 1. Pierwszy z nich jest wykorzystywany do inicjalizacji pomiaru ADC (patrz \ref{zasada_dzialania_watek_adc}) a drugi do regularnego generowania przerwań wykorzystanych przy odtwarzaniu tonu o określonej częstotliwości (patrz \ref{zasada_dzialania_watek_dac}). Timer jest podstawowym urządzeniem peryferyjnym mikrokontrolera, które służy do zliczania impulsów zegara (w rejestrze Timer Counter - TC). Istnieje możliwość aby zmniejszyć częstotliwość doprowadzoną z rdzenia procesora do samego timera dzieląc ją przez 2, 4 lub 8.
+
+Każdy timer posiada 32-bitowy preskaler, który zlicza impulsy zegara do pewnej wartości (rejestr Prescale Register - PR). Dopiero kiedy ją osiągnie właściwy 32-bitowy licznik timera zostaje zwiększony.
+
+Ponadto timer zawiera rejestry MR0/1/2/3 które są ciągle porównywane z wartością rejestru TC. Kiedy w TC znajduje się to samo co w rejestre MR podejmowane są odpowiednie kroki, w zależności od konfiguracji zapisanej w rejestrze Match Control Register (MCR) może być generowane przerwanie, wartość TC może zostać zresetowana lub cały timer może zostać zatrzymany.
+
+Istnieje także możliwość aby stan na wybranych pinach procesora (MAT0/3) ulegał zmianie w przypadku wystąpienia zdarzenia Match Register. Zachowanie to jest konfigurowane w rejestrze External Match Register (EMR).
+
+Opisane powyżej rejestry (TC, TCR, MR0/1/2/3, MCR, EMR, PR) są osobnymi i niezależnymi obszarami pamięci dla każdego timera.
+
+\subsubsection{Timer 0}
+Zadaniem Timera 0 jest zmiana stanu pinu MAT0.1 z częstotliwością 16 MHz. W ten sposób ADC (patrz \ref{zasada_dzialania_watek_adc}), które jest skonfigurowane aby wykonywać pomiar na narastającym zboczu pinu MAT0.1, pracuje z częstotliwością 8 MHz. W tym celu wykonana zostaje następująca konfiguracja:
+\begin{enumerate}
+    \item Timer 0 zostaje zasilony poprzez ustawienie bitu 1 (PCTIM0) rejestru PCONP
+    \item Częstotliwość taktowania Timera 0 jest ustawiona na $\frac{1}{4}$ częstotliwości taktowania mikrokontrolera (patrz \ref{system_clock}) poprzez ustawienie bitów 2 i 3 rejestru PCLKSEL0 na wartość 0, częstotliwość taktowania Timera 0 wynosi zatem $\frac{100MHz}{4} = 25MHz$
+    \item Wartości licznika timera i licznika preskalera jest synchronicznie resetowana przez kolejno ustawienie i wyzerowanie bitu 1 (Counter Reset) rejestru TCR.
+    \item Wartość preskalera jest ustawiona na 0 poprez wpisanie wartości 0 do rejestru PC, oznacza to, że z każdym 'tickiem' zegara taktującego timer wartość licznika TC ulegnie zwiększeniu o 1
+    \item Bity 6 i 7 rejestru EMR zostają ustawione, aby, kiedy dojdzie do zdarzenia Compare Match 1, pin MAT0.1 zmienił stan na przeciwny
+    \item Do rejestru MR1 zostaje wpisana wartość $25000000 / 16000 \approx 1562$, co oznacza, że do zdarzenia Compare Match 1 będzie zachodzić z częstotliwością 16 kHz
+    \item Timer zostaje skonfigurowany aby w przypadku wystąpienia zdarzenia Comare Match 1 zresetować swój licznik, w tym celu zostaje ustawiony bit 4 rejestru MCR
+    \item Poprzez ustawienie bitu 0 rejestru TCR timer zostaje uruchomiony
+\end{enumerate}
+
+\subsubsection{Timer 1}
+Zadaniem Timera 1 jest generować przerwanie z częstotliwością 100 kHz (patrz \ref{zasada_dzialania_watek_dac}). W tym celu wykonana zostaje następująca konfiguracja:
+\begin{enumerate}
+    \item Timer 1 zostaje zasilony poprzez ustawienie bitu 2 (PCTIM1) rejestru PCONP
+    \item Częstotliwość taktowania Timera 1 jest ustawiona na $\frac{1}{4}$ częstotliwości taktowania mikrokontrolera (patrz \ref{system_clock}) poprzez ustawienie bitów 4 i 5 rejestru PCLKSEL0 na wartość 0, częstotliwość taktowania Timera 1 wynosi zatem $\frac{100MHz}{4} = 25MHz$
+    \item Wartości licznika timera i licznika preskalera jest synchronicznie resetowana przez kolejno ustawienie i wyzerowanie bitu 1 (Counter Reset) rejestru TCR.
+    \item Wartość preskalera jest ustawiona na 0 poprez wpisanie wartości 0 do rejestru PC, oznacza to, że z każdym 'tickiem' zegara taktującego timer wartość licznika TC ulegnie zwiększeniu o 1
+    \item Do rejestru MR1 zostaje wpisana wartość $25000000 / 100000 = 250$, co oznacza, że do zdarzenia Compare Match 1 będzie zachodzić z częstotliwością 100 kHz
+    \item Timer zostaje skonfigurowany aby w przypadku wystąpienia zdarzenia Comare Match 1 zresetować swój licznik oraz wygenerować przerwanie, w tym celu zostają ustawione bity 3 i 4 rejestru MCR
+    \item Poprzez ustawienie bitu 0 rejestru TCR timer zostaje uruchomiony
+\end{enumerate}
