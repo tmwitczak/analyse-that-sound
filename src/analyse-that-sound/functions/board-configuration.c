@@ -24,6 +24,7 @@
 /* \\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\ Constants */
 #define TIMER_CLOCK_FREQUENCY 25000000
 
+
 /* \\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\ Declarations */
 static
 void configureSystemClock(void);
@@ -36,9 +37,6 @@ void configureAndStartOLED(void);
 
 static
 void init_ssp(void);
-
-static
-void init_i2c(void);
 
 static
 void configureAndStartTimer0(void);
@@ -149,7 +147,6 @@ static
 void configureAndStartOLED(void)
 {
     init_ssp();
-    init_i2c();
     oled_init();
 }
 
@@ -182,25 +179,6 @@ void init_ssp(void)
     // Enable SSP peripheral
     SSP_Cmd(LPC_SSP1, ENABLE);
 
-}
-
-static
-void init_i2c(void)
-{
-    PINSEL_CFG_Type PinCfg;
-
-    // Initialize I2C2 pin connect
-    PinCfg.Funcnum = 2;
-    PinCfg.Pinnum = 10;
-    PinCfg.Portnum = 0;
-    PINSEL_ConfigPin(&PinCfg);
-    PinCfg.Pinnum = 11;
-    PINSEL_ConfigPin(&PinCfg);
-
-    // Initialize I2C peripheral
-    I2C_Init(LPC_I2C2, 100000);
-
-    I2C_Cmd(LPC_I2C2, ENABLE);
 }
 
 static
