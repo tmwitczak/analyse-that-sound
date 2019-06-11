@@ -12,7 +12,7 @@ Ogólną zasadę działania programu można przedstawić w następujących kroka
 
 Właściwie opisane wyżej zadania są wykonywane w trzech oddzielnych wątkach, które są odpowiedzialne za realizację poszczególnych kroków. Dwa pierwsze z nich zostały zrealizowane z wykorzystaniem przerwań, co zapewnia regularność i stabilność pomiaru oraz generowania tonu, które to operacje muszą być wykonywane z określoną częstotliwością.
 
-\subsection{Czytanie ADC i wypełnianie bufora cyklicznego}
+\subsection{Czytanie ADC i wypełnianie bufora cyklicznego} \label{zasada_dzialania_watek_adc}
 Ten wątek jest zrealizowany z wykorzystaniem obsługi przerwania ADC, do którego dochodzi po zakończeniu pojedynczego pomiaru. Kolejne pomiary są dokonywane kiedy pin MAT0.1 zmieni stan na wysoki (narastające zbocze), do czego z kolei dochodzi w wyniku zdarzenia 'compare match' timera 0. Częstotliwość pomiaru jest więc zdeterminowana częstotliwością występowania tego zdarzenia. Poprzez odpowiednią (szczegóły w sekcji !!!) konfigurację timera, ADC pracuje z częstotliwością 8000 Hz, jest to częstotliwość próbkowania. Należy zaznaczyć, że z przeprowadzonych obliczeń (sekcja !!!) wynika, iż przy założonej częstotliwości próbkowania ADC zdąży dokonać pełnego pomiaru nim następny będzie miał być rozpoczęty. Jeden pełny cykl pracy tego wątku, a więc jednokrotne wywołanie obsługi przerwania realizuje następujące operacje:
 \begin{enumerate}
     \item Pobranie zmierzonej przez ADC wartości (pojedynczej próbki)
@@ -22,7 +22,7 @@ Ten wątek jest zrealizowany z wykorzystaniem obsługi przerwania ADC, do które
 \end{enumerate}
 Operacje te są wykonywane po każdym pomiarze, który z kolei jest wykonywany cyklicznie z określoną (8000 Hz) częstotliwością. Wspomniany bufor ma rozmiar 1024 co odpowiada ok. $\frac{1}{8}$ części sekundy. Te dwa parametry (częstotliwość próbkowania oraz rozmiar bufora) muszą być znane i niezmienne aby można było poprawnie wykonać transformację Fouriera i poprawnie zinterpretować jej wynik, co jest zapewnione w opisany powyżej sposób.
 
-\subsection{Generowanie tonu o wybranej częstotliwości}
+\subsection{Generowanie tonu o wybranej częstotliwości} \label{zasada_dzialania_watek_dac}
 Podobnie jak wątek odpowiedzialny za zbieranie danych, ten także jest zrealizowany poprzez obsługę przerwania, które w tym przypadku jest generowane bezpośrednio przez zdarzenie 'compare match' timera 1. Częstotliwość występowania tego zdarzenia jest ustawiona na 100000 Hz.
 
 W pamięci urządzenia przechowywana jest tablica 128 wartości funkcji sinus, znormalizowanych w przedziale $[0-1023]$ a rozłożonych równomiernie na jednym całym okresie. Zakres tych wartości wynika bezpośrednio w zakresu wartości wykorzystywanych przez DAC (10 bitów). Podając więc wspomniane wartości na wyjście DAC wygenerowany zostanie czysty ton. Przy częstotliwości pracy DAC 100000 Hz i z wykorzystaniem wszystkich dostępnych wartości funkcji sinus, możemy wygenerować częstotliwość $\frac{100000 Hz}{128} = 781.25 Hz$. Podczas generowania częstotliwości niższych, kształt powstałej fali będzie wciąż przypomniał sinus, choć pojawią się dodatkowo tzw. 'schodki'. Generowanie częstotliwości wyższych jest ograniczone i zakładając, że potrzeba przynajmniej czterech różnych wartości na 1 okres to najwyższą możliwą do wytworzenia częstotliwością przy tej częstotliwości pracy DAC jest 25000 Hz co stanowi więcej niż człowiek może usłyszeć.
@@ -51,7 +51,7 @@ Jedna iteracja (jednokrotne wykonanie obsługi przerwania) w tym wątku przebieg
     \item Wyczyszczenie flagi przerwania
 \end{enumerate}
 
-\subsection{Wątek główny, liczenie FFT, rysowanie}
+\subsection{Wątek główny, liczenie FFT, rysowanie} \label{zasada_dzialania_watek_glowny}
 Główny wątek aplikacji wykonuje się w metodzie main. Tutaj czas nie gra już tak istotnej roli i w praktyce nie ma znaczenia jak często i czy regularnie będą się wykonywały kolejne jego iteracji, o ile użytkownik oglądający wyniki na ekranie będzie usatysfakcjonowany częstotliwością ich odświeżania. Wątek ten jest przerywany kiedy dochodzi do jednego z przerwań, opisanych powyżej, tym samym ma on najniższy priorytet. Ciąg operacji, który przez ten wątek w nieskończoność jest powtarzany wygląda następująco:
 \begin{enumerate}
     \item Obliczenie transformaty Fouriera, znalezienie najmocniejszej składowej częstotliwości
