@@ -13,7 +13,7 @@ Ogólną zasadę działania programu można przedstawić w następujących kroka
 Właściwie opisane wyżej zadania są wykonywane w trzech oddzielnych wątkach, które są odpowiedzialne za realizację poszczególnych kroków. Dwa pierwsze z nich zostały zrealizowane z wykorzystaniem przerwań, co zapewnia regularność i stabilność pomiaru oraz generowania tonu, które to operacje muszą być wykonywane z określoną częstotliwością.
 
 \subsection{Czytanie ADC i wypełnianie bufora cyklicznego} \label{zasada_dzialania_watek_adc}
-Ten wątek jest zrealizowany z wykorzystaniem obsługi przerwania ADC, do którego dochodzi po zakończeniu pojedynczego pomiaru. Kolejne pomiary są dokonywane kiedy pin MAT0.1 zmieni stan na wysoki (narastające zbocze), do czego z kolei dochodzi w wyniku zdarzenia 'compare match' timera 0. Częstotliwość pomiaru jest więc zdeterminowana częstotliwością występowania tego zdarzenia. Poprzez odpowiednią (szczegóły w sekcji !!!) konfigurację timera, ADC pracuje z częstotliwością 8000 Hz, jest to częstotliwość próbkowania. Należy zaznaczyć, że z przeprowadzonych obliczeń (sekcja !!!) wynika, iż przy założonej częstotliwości próbkowania ADC zdąży dokonać pełnego pomiaru nim następny będzie miał być rozpoczęty. Jeden pełny cykl pracy tego wątku, a więc jednokrotne wywołanie obsługi przerwania realizuje następujące operacje:
+Ten wątek jest zrealizowany z wykorzystaniem obsługi przerwania ADC, do którego dochodzi po zakończeniu pojedynczego pomiaru. Kolejne pomiary są dokonywane kiedy pin MAT0.1 zmieni stan na wysoki (narastające zbocze), do czego z kolei dochodzi w wyniku zdarzenia 'compare match' timera 0. Częstotliwość pomiaru jest więc zdeterminowana częstotliwością występowania tego zdarzenia. Poprzez odpowiednią (szczegóły w sekcji \ref{timer}) konfigurację timera, ADC pracuje z częstotliwością 8000 Hz, jest to częstotliwość próbkowania. Należy zaznaczyć, że z przeprowadzonych obliczeń (sekcja \ref{adc}) wynika, iż przy założonej częstotliwości próbkowania ADC zdąży dokonać pełnego pomiaru nim następny będzie miał być rozpoczęty. Jeden pełny cykl pracy tego wątku, a więc jednokrotne wywołanie obsługi przerwania realizuje następujące operacje:
 \begin{enumerate}
     \item Pobranie zmierzonej przez ADC wartości (pojedynczej próbki)
     \item Zapisanie próbki do obecnej pozycji w buforze, która jest przechowywana w postaci wskaźnika
@@ -38,7 +38,7 @@ Gdzie $n$ to liczba półtonów a $freq$ oznacza częstotliwość. Aby nie wykon
 
 Wybrana głośność jest uzyskiwane poprzez normalizację wartości wpisywanej do DAC zgodnie ze wzorem:
 \begin{equation}
-    dac = \frac{sample \cdot v}{100}   \label{dac}
+    dac = \frac{sample \cdot v}{100}   \label{dac_formula}
 \end{equation}
 Gdzie $dac$ to wartość wpisywana do DAC, $v$ to wybrana przez użytkownika głośność a $sample$ to pochodząca z tablicy wartości funkcji sinus, czyli przypadająca na obecną iterację próbka generowane sygnału dźwiękowego.
 
@@ -46,7 +46,7 @@ Jedna iteracja (jednokrotne wykonanie obsługi przerwania) w tym wątku przebieg
 \begin{enumerate}
     \item Obliczenia zmienionej częstotliwości na podstawie wybranego przez użytkownika interwału i globalnie znanej ostatnio rozpoznanej częstotliwości, zgodnie ze wzorem (\ref{freq}) i uwzględniając wspomniane przybliżenia
     \item Obliczenie przypadającej na daną iterację próbki ze zbioru znanych wartości funkcji sinus, na podstawie znanego numeru iteracji oraz znanej częstotliwości do wygenerowania
-    \item Przekształcenie znalezionej wartości sinusa aby uzyskać określoną głośność zgodnie ze wzorem (\ref{dac})
+    \item Przekształcenie znalezionej wartości sinusa aby uzyskać określoną głośność zgodnie ze wzorem (\ref{dac_formula})
     \item Wpisanie tak znalezionej liczby do DAC
     \item Wyczyszczenie flagi przerwania
 \end{enumerate}

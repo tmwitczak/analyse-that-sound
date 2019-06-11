@@ -1,4 +1,5 @@
-\subsection{Timery}
+\subsection{Timer 0/1} \label{timer}
+
 Wykorzystane zostały dwa timery: Timer 0 i Timer 1. Pierwszy z nich jest wykorzystywany do inicjalizacji pomiaru ADC (patrz \ref{zasada_dzialania_watek_adc}) a drugi do regularnego generowania przerwań wykorzystanych przy odtwarzaniu tonu o określonej częstotliwości (patrz \ref{zasada_dzialania_watek_dac}). Timer jest podstawowym urządzeniem peryferyjnym mikrokontrolera, które służy do zliczania impulsów zegara (w rejestrze Timer Counter - TC). Istnieje możliwość aby zmniejszyć częstotliwość doprowadzoną z rdzenia procesora do samego timera dzieląc ją przez 2, 4 lub 8.
 
 Każdy timer posiada 32-bitowy preskaler, który zlicza impulsy zegara do pewnej wartości (rejestr Prescale Register - PR). Dopiero kiedy ją osiągnie właściwy 32-bitowy licznik timera zostaje zwiększony.
