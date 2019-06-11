@@ -24,6 +24,43 @@
 /* \\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\ Constants */
 #define TIMER_CLOCK_FREQUENCY 25000000
 
+/* \\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\ Declarations */
+static
+void configureSystemClock(void);
+
+static
+void configurePeripherials(void);
+
+static
+void configureAndStartOLED(void);
+
+static
+void init_ssp(void);
+
+static
+void init_i2c(void);
+
+static
+void configureAndStartTimer0(void);
+
+static
+void configureAndStartTimer1(void);
+
+static
+void configureAndStartADC(void);
+
+static
+void configureAndStartDAC(void);
+
+static
+void configureAndStartSpeakerAmplifier(void);
+
+static
+void configureJoystick(void);
+
+static
+void configureInterruptsInNVIC(void);
+
 
 /* \\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\ Board configuration */
 void configureBoard(void)

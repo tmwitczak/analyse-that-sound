@@ -2,11 +2,6 @@
 #define ANALYSE_THAT_SOUND_CONSTANTS_H
 
 /* \\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\ Constants */
-/* -------------------------------------------------------- Boolean values -- */
-#define BOOL  int
-#define TRUE  1
-#define FALSE 0
-
 /* -------------------------------------------------------- FFT parameters -- */
 #define SAMPLE_RATE                8000
 #define FFT_POINTS_NUMBER          1024
