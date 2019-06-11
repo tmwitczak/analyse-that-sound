@@ -1,0 +1,32 @@
+\subsection{Zegar systemowy i PLL0}
+
+Aby mikrokontroler mógł pracować musi być doprowadzony do niego jakiś sygnał zegarowy. Wykorzystywane w projekcie urządzenie ma dostępne trzy różne oscylatory:
+\begin{itemize}
+    \item Main oscillator - zewnętrzny kwarc 12 MHz
+    \item Internal RC oscillator - wewnętrzny układ drgający
+    \item RTC oscillator - zewnętrzny kwarc 32 kHz
+\end{itemize}
+Każdy z nich może być źródłem (clock source) dla urządzenia peryferyjnego PLL0 (Phase Locked Loop 0), które częstotliwość doprowadzonego sygnału dzieli i mnoży przez wybrane współczynniki dając możliwość zwiększenia i precyzyjnego dostosowania potrzebnej częstotliwości taktowania procesora. Ostatecznie sygnał generowany przez PLL0 jest dzielony przez ustawiony w rejestrze dzielnik (clock divider) i w ten sposób zostaje wygenerowany sygnał bezpośrednio taktujący mikrokontroler.
+
+W opisywanym programie docelowa (i największa możliwa na wykorzystywanym urządzeniu) częstotliwość taktowania mikrokontrolera wynosi 100 MHz. Aby ustawić wybraną częstotliwość procesor jest konfigurowany w nastepujący sposób:
+\begin{enumerate}
+    \item Włączenie \emph{main oscillator} poprzez ustawienie bitu 5 (OSCEN) w rejestrze SCS i odczekanie na jego uruchomienie sprawdzając bit 6 (OSCSTAT) w rejestrze SCS
+    \item Ustawienie \emph{clock divider} na 3 poprzez wpisanie wartości 2 do rejestru CCLKCFG
+    \item Wybranie \emph{main oscillator} jako źródła zegarowego dla \emph{PLL0} poprzez wpisanie wartości 1 do rejestru CLKSRCSEL
+    \item Ustawienie wykorzystywanyc przez \emph{PLL0} liczb N = 2 i M = 25, gdzie N stanowi starsze 16 bitów a M młodsze 16 bitów rejestru PLL0CFG, wykonanie 'feed sequence' aby zmiany w rejestrach \emph{PLL0} doszły do skutku
+    \item Uruchomienie \emph{PLL0} poprzez ustawienie bitu 0 rejestru PLL0CON, wykonanie 'feed sequence', odczekanie na zmiany sprawdzając bit 26 rejestru PLL0STAT
+    \item Podłączenie \emph{PLL0} poprzez ustawienie bitu 1 rejestru PLL0CON, wykonanie 'feed sequence', odczekanie na zmiany sprawdzając bity 24 i 25 rejestru PLL0STAT
+\end{enumerate}
+Kolejność wykonywania przedstawionych operacji jest zdeterminowana wymogami z dokumentacji urządzenia. Opisywane powyżej 'feed sequence' składa się z:
+\begin{itemize}
+    \item wpisania do PLL0FEED wartości 0xAA
+    \item wpisania do PLL0FEED wartości 0x55
+\end{itemize}
+Ponieważ częstotliwość wyjściowa \emph{PLL0} musi znaleźć się w przedziale 275 do 550 MHz, zostaje ona ustawiona na 300 MHz a następnie zmniejszona do 100 MHz z wykorzystaniem \emph{clock divider} równego 3 ($\frac{300MHz}{3}=100MHz$). Częstotliwość wyjściową \emph{PLL0} oblicza się ze wzoru:
+\begin{equation}
+    F_{CCO}=\frac{2 \cdot M \cdot F_{IN}}{N}
+\end{equation}
+Gdzie $F_{CCO}$ oznacza częstotliwość wyjściową, $F_{IN}$ częstotliwość wejściową a N i M to opisane wcześniej, modyfikowalne i przechowywane w odpowiednim rejestrze parametry. Przy założonych N=2 i M=25 faktycznie:
+\begin{displaymath}
+    F_{CCO}=\frac{2 \cdot 25 \cdot 12MHz}{2}=300MHz
+\end{displaymath}
