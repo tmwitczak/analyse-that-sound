@@ -46,3 +46,17 @@
     wartość 0. Aby konwersja została uruchomiona w momencie wystąpienia
     narastającego zbocza, ustawiamy w rejestrze AD0CR bity 26, 25
     i 24 kolejno na wartości 1, 0 i 0.
+
+\paragraph{Częstotliwość pracy a częstotliwość próbkowania}
+    Częstotliwość pracy ADC po uwzględnieniu wszystkich dzielników wynosi
+    12,5 MHz, natomiast jedna konwersja zajmuje 65 cykli. Z tego wynika,
+    że najwyższa liczba konwersji na sekundę możliwych do uzyskania przy tej
+    konfiguracji to:
+
+    \begin{equation}
+        \frac{12500000MHz}{65} \approx 192308
+    \end{equation}
+
+    Częstotliwość próbkowania sygnału wynosi 8000 Hz. Wynika stąd, że konwersja
+    zdąży się wykonać w czasie wymaganym dla wybranej częstotliwości
+    próbkowania.
