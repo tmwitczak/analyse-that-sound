@@ -1,0 +1,13 @@
+\subsection{Cel projektu}
+Zadaniem programu jest wyświetlić poglądowy rozkład częstotliwości sygnału dźwiękowego z otoczenia w postaci wykresu na ekranie wyświetlacza. Ponadto urządzenie znajduje najmocniejszą składową przetwarzanego sygnału a następnie generuje i odtwarza na wyjściu czysty ton o częstotliwości tej samej lub wyższej o wybrany interwał.
+
+\subsection{Obsługa urządzenia}
+Kiedy urządzenie zostanie zasilone nastąpi trwająca kilka sekund inicjalizacja systemu. Następnie program zostanie załadowany do pamięci. Po uruchomieniu od razu dochodzi do analizy dźwięku, który jest odczytywany z zewnętrznego mikrofonu. Przez cały czas działania urządzenie generuje także wybraną częstotliwość. Użytkownik ma możliwość interakcji z programem poprzez joystick.
+
+Użytkownik ma możliwość wybrać głośność urządzenia w przedziale od 0 do 100 (z dokładnością do 10), gdzie 0 oznacza ciszę a 100 najgłośniejszy sygnał jaki można wygenerować. Aby to zrobić należy przesunąć joystick w górę ('głośniej o 10') lub w dół ('ciszej o 10').
+
+Użytkownik może także zwiększyć generowaną częstotliwość o wybraną liczbę półtonów (interwał) z przedziału od 0 do 11, w stosunku do częstotliwości rozpoznanej. Aby to zrobić należy przesunąć joystick w lewo ('mniej o 1') lub w prawo ('więcej o 1').
+
+Program może wyświetlać dwa zestawy informacji, pomiędzy którymi można przełączać się z wykorzystaniem środkowego przycisku joysticka. Pierwszy z nich to wykres natężeń poszczególnych częstotliwości składowych analizowanego sygnału dźwiękowego. W drugim zestawie na wyświetlaczu pokazuje się najmocniejsza częstotliwość, a także informacje o ustawionym obecnie interwale i głośności, których zakresy i znaczenie zostały opisane powyżej.
+
+Należy zwrócić uwagę, że rozponawanie pozycji joysticka dokonuje się wraz z odświeżaniem ekranu wyświetlacza, które to z kolei trwa zauważalny odcinek czasu (kilkadziesiąt a czasem kilkaset milisekund). Oznacza to, że w przypadku zbyt szybkiego ruchu joystickiem może nie zostać on zarejestrowany, nie ma więc potrzeby aby się tak bardzo spieszyć z powrotem do położenia równowagi.

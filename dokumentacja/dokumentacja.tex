@@ -27,111 +27,19 @@
 \end{enumerate}
 
 \section{Instrukcja użytkownika}
-
-\subsection{Cel projektu}
-Zadaniem programu jest wyświetlić poglądowy rozkład częstotliwości sygnału dźwiękowego z otoczenia w postaci wykresu na ekranie wyświetlacza. Ponadto urządzenie znajduje najmocniejszą składową przetwarzanego sygnału a następnie generuje i odtwarza na wyjściu czysty ton o częstotliwości tej samej lub wyższej o wybrany interwał.
-
-\subsection{Obsługa urządzenia}
-Kiedy urządzenie zostanie zasilone nastąpi trwająca kilka sekund inicjalizacja systemu. Następnie program zostanie załadowany do pamięci. Po uruchomieniu od razu dochodzi do analizy dźwięku, który jest odczytywany z zewnętrznego mikrofonu. Przez cały czas działania urządzenie generuje także wybraną częstotliwość. Użytkownik ma możliwość interakcji z programem poprzez joystick.
-
-Użytkownik ma możliwość wybrać głośność urządzenia w przedziale od 0 do 100 (z dokładnością do 10), gdzie 0 oznacza ciszę a 100 najgłośniejszy sygnał jaki można wygenerować. Aby to zrobić należy przesunąć joystick w górę ('głośniej o 10') lub w dół ('ciszej o 10').
-
-Użytkownik może także zwiększyć generowaną częstotliwość o wybraną liczbę półtonów (interwał) z przedziału od 0 do 11, w stosunku do częstotliwości rozpoznanej. Aby to zrobić należy przesunąć joystick w lewo ('mniej o 1') lub w prawo ('więcej o 1').
-
-Program może wyświetlać dwa zestawy informacji, pomiędzy którymi można przełączać się z wykorzystaniem środkowego przycisku joysticka. Pierwszy z nich to wykres natężeń poszczególnych częstotliwości składowych analizowanego sygnału dźwiękowego. W drugim zestawie na wyświetlaczu pokazuje się najmocniejsza częstotliwość, a także informacje o ustawionym obecnie interwale i głośności, których zakresy i znaczenie zostały opisane powyżej.
-
-Należy zwrócić uwagę, że rozponawanie pozycji joysticka dokonuje się wraz z odświeżaniem ekranu wyświetlacza, które to z kolei trwa zauważalny odcinek czasu (kilkadziesiąt a czasem kilkaset milisekund). Oznacza to, że w przypadku zbyt szybkiego ruchu joystickiem może nie zostać on zarejestrowany, nie ma więc potrzeby aby się tak bardzo spieszyć z powrotem do położenia równowagi.
+\input{instrukcja_uzytkownika}
 
 \section{Zasada działania}
-Ogólną zasadę działania programu można przedstawić w następujących krokach:
-\begin{enumerate}
-    \item sygnał dźwiękowy rozchodzący się w powietrzu jest zamieniany na analogowy sygnał elektryczny z wykorzystaniem mikrofonu, który jest odrębnym układem elektrycznym
-    \item sygnał analogowy z mikrofonu zostaje przetworzony do postaci cyfrowej z wykorzystaniem ADC
-    \item wartości przeczytane z konwertera analogowo-cyfrowego są zapisywane w buforze cyklicznym
-    \item wartości z bufora są kopiowane a następnie wykonuje się na nich szybką transformację Fouriera
-    \item w wyniku transformacji próbek otrzymujemy wartość natężenia poszczególnych składowych przetwarzanego sygnału (dla potrzeb preprowadzanych obliczeń istotne są jedynie stosunki otrzymanych wartości)
-    \item przy użyciu DAC podłączonego do speakera generowany jest ton, z uwzględnieniem wybranych przez użytkownika głośności i modyfikacji najmocniejszej rozpoznanej częstotliwości składowej
-    \item wynik transformacji zostaje znormalizowany, tak by liczba próbek odpowiadała liczbie kolumn pikseli na wyświetlaczu a wartość maksymalna liczbie wierszy
-    \item znormalizowana transformata zostaje wyświetlona na wyświetlaczu
-\end{enumerate}
-
-Właściwie opisane wyżej zadania są wykonywane w trzech oddzielnych wątkach, które są odpowiedzialne za realizację poszczególnych kroków. Dwa pierwsze z nich zostały zrealizowane z wykorzystaniem przerwań, co zapewnia regularność i stabilność pomiaru oraz generowania tonu, które to operacje muszą być wykonywane z określoną częstotliwością.
-
-\subsection{Czytanie ADC i wypełnianie bufora cyklicznego}
-Ten wątek jest zrealizowany z wykorzystaniem obsługi przerwania ADC, do którego dochodzi po zakończeniu pojedynczego pomiaru. Kolejne pomiary są dokonywane kiedy pin MAT0.1 zmieni stan na wysoki (narastające zbocze), do czego z kolei dochodzi w wyniku zdarzenia 'compare match' timera 0. Częstotliwość pomiaru jest więc zdeterminowana częstotliwością występowania tego zdarzenia. Poprzez odpowiednią (szczegóły w sekcji !!!) konfigurację timera, ADC pracuje z częstotliwością 8000 Hz, jest to częstotliwość próbkowania. Należy zaznaczyć, że z przeprowadzonych obliczeń (sekcja !!!) wynika, iż przy założonej częstotliwości próbkowania ADC zdąży dokonać pełnego pomiaru nim następny będzie miał być rozpoczęty. Jeden pełny cykl pracy tego wątku, a więc jednokrotne wywołanie obsługi przerwania realizuje następujące operacje:
-\begin{enumerate}
-    \item Pobranie zmierzonej przez ADC wartości (pojedynczej próbki)
-    \item Zapisanie próbki do obecnej pozycji w buforze, która jest przechowywana w postaci wskaźnika
-    \item Przesunięcie wskaźnika bufora (jeżeli jest na końcu to przeskok do początku - bufor cykliczny)
-    \item Wyczyszcenie flagi przerwania
-\end{enumerate}
-Operacje te są wykonywane po każdym pomiarze, który z kolei jest wykonywany cyklicznie z określoną (8000 Hz) częstotliwością. Wspomniany bufor ma rozmiar 1024 co odpowiada ok. $\frac{1}{8}$ części sekundy. Te dwa parametry (częstotliwość próbkowania oraz rozmiar bufora) muszą być znane i niezmienne aby można było poprawnie wykonać transformację Fouriera i poprawnie zinterpretować jej wynik, co jest zapewnione w opisany powyżej sposób.
-
-\subsection{Generowanie tonu o wybranej częstotliwości}
-Podobnie jak wątek odpowiedzialny za zbieranie danych, ten także jest zrealizowany poprzez obsługę przerwania, które w tym przypadku jest generowane bezpośrednio przez zdarzenie 'compare match' timera 1. Częstotliwość występowania tego zdarzenia jest ustawiona na 100000 Hz.
-
-W pamięci urządzenia przechowywana jest tablica 128 wartości funkcji sinus, znormalizowanych w przedziale $[0-1023]$ a rozłożonych równomiernie na jednym całym okresie. Zakres tych wartości wynika bezpośrednio w zakresu wartości wykorzystywanych przez DAC (10 bitów). Podając więc wspomniane wartości na wyjście DAC wygenerowany zostanie czysty ton. Przy częstotliwości pracy DAC 100000 Hz i z wykorzystaniem wszystkich dostępnych wartości funkcji sinus, możemy wygenerować częstotliwość $\frac{100000 Hz}{128} = 781.25 Hz$. Podczas generowania częstotliwości niższych, kształt powstałej fali będzie wciąż przypomniał sinus, choć pojawią się dodatkowo tzw. 'schodki'. Generowanie częstotliwości wyższych jest ograniczone i zakładając, że potrzeba przynajmniej czterech różnych wartości na 1 okres to najwyższą możliwą do wytworzenia częstotliwością przy tej częstotliwości pracy DAC jest 25000 Hz co stanowi więcej niż człowiek może usłyszeć.
-
-Podczas generowania częstoliwości uwzględnione jest wybrane przez użytkownika przesunięcie, mierzone w półtonach. Zwiększenie częstotliwości o wybraną liczbę półtonów uzyskuje się według następującego wzoru:
-\begin{equation}
-    freq = freq \cdot (2^{\frac{1}{12}})^{n}    \label{freq}
-\end{equation}
-\begin{displaymath}
-    2^{\frac{1}{12}} \approx 1.05946309436
-\end{displaymath}
-Gdzie $n$ to liczba półtonów a $freq$ oznacza częstotliwość. Aby nie wykonywać obliczeń zmiennoprzecinkowych rozpoznana częstotliwość jest mnożona przez $105946$ a następnie dzielona przez $100000$. Stwierdzono doświadczalnie, że takie przybliżenie jest zadowalające (powstały interwał bez problemu jest rozpoznawany jako półton).
-
-Wybrana głośność jest uzyskiwane poprzez normalizację wartości wpisywanej do DAC zgodnie ze wzorem:
-\begin{equation}
-    dac = \frac{sample \cdot v}{100}   \label{dac}
-\end{equation}
-Gdzie $dac$ to wartość wpisywana do DAC, $v$ to wybrana przez użytkownika głośność a $sample$ to pochodząca z tablicy wartości funkcji sinus, czyli przypadająca na obecną iterację próbka generowane sygnału dźwiękowego.
-
-Jedna iteracja (jednokrotne wykonanie obsługi przerwania) w tym wątku przebiega następująco:
-\begin{enumerate}
-    \item Obliczenia zmienionej częstotliwości na podstawie wybranego przez użytkownika interwału i globalnie znanej ostatnio rozpoznanej częstotliwości, zgodnie ze wzorem (\ref{freq}) i uwzględniając wspomniane przybliżenia
-    \item Obliczenie przypadającej na daną iterację próbki ze zbioru znanych wartości funkcji sinus, na podstawie znanego numeru iteracji oraz znanej częstotliwości do wygenerowania
-    \item Przekształcenie znalezionej wartości sinusa aby uzyskać określoną głośność zgodnie ze wzorem (\ref{dac})
-    \item Wpisanie tak znalezionej liczby do DAC
-    \item Wyczyszczenie flagi przerwania
-\end{enumerate}
-
-\subsection{Wątek główny, liczenie FFT, rysowanie}
-Główny wątek aplikacji wykonuje się w metodzie main. Tutaj czas nie gra już tak istotnej roli i w praktyce nie ma znaczenia jak często i czy regularnie będą się wykonywały kolejne jego iteracji, o ile użytkownik oglądający wyniki na ekranie będzie usatysfakcjonowany częstotliwością ich odświeżania. Wątek ten jest przerywany kiedy dochodzi do jednego z przerwań, opisanych powyżej, tym samym ma on najniższy priorytet. Ciąg operacji, który przez ten wątek w nieskończoność jest powtarzany wygląda następująco:
-\begin{enumerate}
-    \item Obliczenie transformaty Fouriera, znalezienie najmocniejszej składowej częstotliwości
-    \item Zależnie od wybranego trybu wyświetlenie na ekranie statystyk bądź transformaty, wykonywane jest poprzez wysłanie odpowiednich komend do sterownika wyświetlacza przez interfejs SPI
-    \item Sprawdzenie stanu joysticka, jeżeli doszło do zmiany stanu to w zależności od niego dokonywana jest odpowiednia akcja:
-        \begin{itemize}
-            \item w lewo - zmniejszenie interwału o 1
-            \item w prawo - zwiększenie interwału o 1
-            \item w górę - zwiększenie głośności o 10
-            \item w dół - zmniejszenie głośności o 10
-            \item środek - zmiana widoku pomiędzy wykresem transformaty a informacją tekstową o interwale, głośności i rozpoznanej częstotliwości
-        \end{itemize}
-\end{enumerate}
-
-\subsection{Transformata Fouriera}
-Wspomniane powyżej obliczenie transformaty Fouriera, jako jedna z operacji wykonywanych przez wątek główny aplikacji, składa się z szeregu dodatkowych przekształceń i obliczeń, które muszą zostać wykonane, aby z surowych danych w postaci próbek sygnału ciągłego doprowadzonego do ADC (natężenia w funkcji czasu) otrzymać wartość najmocniejszej, składowej częstotliwości oraz tablicę danych, znormalizowanych do wyświetlenia na wyświetlaczu w postaci wykresu.
-\begin{enumerate}
-    \item Dane z cyklicznego bufora zawierającego wartości przeczytane z ADC są kopiowane do tymczasowego, operacyjnego bufora, tak, że zajmują indexy parzyste, podczas gdy nieparzyste są ustawione na 0 (bufor ten zawiera liczby zespolone)
-    \item Z wykorzystaniem funkcji z biblioteki CMSIS DSP na buforze operacyjnym wykonywane jest algorytm szybkiego liczenia dyskretnej transformaty Fouriera (FFT)
-    \item Z wykorzystaniem kolejnej funkcji ze wspomnianej biblioteki, na podstawie wyniku transformacji, który ma postać zespoloną, obliczane są wartości amplitud poszczególnych składowych sygnału (moduł liczby zespolonej). Amplitudy te są znane dla tylu składowych, ile próbek zawierał bufor i w taki sposób, że pierwsza składowa oznacza 0 Hz a ostatnia częstoliwość próbkowania (8000 Hz). Ponieważ częstotliwość Nyquista jest równa połowie częstotliwości próbkowania, to tylko pierwsza połowa obliczonych amplitud jest wiarygodna, pozostałe (wyższe) składowe widma są zniekształcone i nie będą uwzględniane w pozostałych obliczeniach. Częstotliwość składowej o numerze $index$ można obliczyć ze wzoru:
-        \begin{equation}
-            freq = \frac{rate \cdot index}{N}  \label{fft_freq}
-        \end{equation}
-        Gdzie $rate$ to częstotliwość próbkowania (8000 Hz), $index$ to numer składowej a $N$ to liczba próbek w buforze, na którym transformata była liczona
-    \item Wartość pierwszej składowej częstotliwośći jest zerowana, ponieważ jest ona jedynie skutkiem ubocznym przeprowadzonych przez biblioteki obliczeń
-    \item Cały ciąg amplitud zostaje podzielony na tyle części, aby każda z nich odpowiadała jednej kolumnie na ekranie wyświetlacza - 96
-    \item Z każdej grupy wyliczana jest średnia amplituda i tak powstaje tablica wartości, który jest tyle samo lub mniej co kolumn na ekranie wyświetlacza
-    \item Znajdywane są dwie wartości maksymalne, jedna z amplitud uśrednionych a druga z wartości nieuśrednionych
-    \item Wartości uśrednione są normalizowane względem znalezionej wcześniej, największej z nich, w ten sposób, by miały wartość od zera do liczby wierszy na ekranie - 64.
-    \item Na podstawie indeksu znalezionej największej wartości amplitud nieuśrednionych, zgodnie ze wzorem (\ref{fft_freq}) obliczana jest najmocniejsza składowa częstotliwość przetwarzanego sygnału
-\end{enumerate}
+\input{zasada_dzialania}
 
 \section{Opis poszczególnych funkcjonalności}
-
-\subsection{System Clock i PLL0}
-Wykorzystywany mikroprocesor może być taktowany z trzech różnych źródeł: internal RC oscillator (wewnętrzny układ), main oscillator (zewnętrzny kwarc), RTC oscillator (zewnętrzny 'wolny' kwarc). 
+\input{system_clock}
+\input{timer}
+\input{interrupts}
+\input{adc}
+\input{dac}
+\input{gpio}
+\input{ssp}
+\input{oled}
 
 \end{document}
