@@ -39,3 +39,14 @@
             \item środek - P0.17
         \end{enumerate}
    
+    \paragraph{OLED}
+        
+	Wysyłanie informacji na wyświetlacz OLED przez interfejs SSP wymaga
+	również użycia GPIO. Przed przesyłem pin P2.7 jest ustawiany w
+	stanie niskim poprzez pisanie do bitu 7 rejestru FIO2CLR
+	wartości 1. Jest to wymagane aby ustawić tryb przesyłania komend.
+	Jeśli natomiast chcemy przesyłać dane, stan ten musi być wysoki.
+
+	Następnie ustawiamy pin P0.6 w stan niski przed przesyłem,
+	natomiast po wysłaniu danych na interfejs - ustawiamy go na
+	stan wysoki (analogiczne operacje na bitach jak wyżej).
