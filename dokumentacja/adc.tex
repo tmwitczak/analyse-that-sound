@@ -48,6 +48,7 @@
     i 24 kolejno na wartości 1, 0 i 0.
 
 \paragraph{Częstotliwość pracy a częstotliwość próbkowania}
+
     Częstotliwość pracy ADC po uwzględnieniu wszystkich dzielników wynosi
     12,5 MHz, natomiast jedna konwersja zajmuje 65 cykli. Z tego wynika,
     że najwyższa liczba konwersji na sekundę możliwych do uzyskania przy tej
@@ -60,3 +61,12 @@
     Częstotliwość próbkowania sygnału wynosi 8000 Hz. Wynika stąd, że konwersja
     zdąży się wykonać w czasie wymaganym dla wybranej częstotliwości
     próbkowania.
+
+\paragraph{Obsługa przerwania}
+
+    Po każdej udanej konwersji zostaje wywołane przerwanie ADC, w którym
+    odczytujemy wartość otrzymanej próbki dla kanału 0 z rejestru AD0DR0
+    z bitów od 15 do 4 włącznie.
+
+    Aby zakończyć przerwanie odczytujemy zawartość rejestru AD0GDR.
+    
