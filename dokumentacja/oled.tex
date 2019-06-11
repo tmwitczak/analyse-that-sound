@@ -1,0 +1,27 @@
+\subsection{Wyświetlacz OLED}
+Wyświetlacz OLED jest zewnętrznym urządzeniem posiadającym własny sterownik i własną pamięć. Można się z nim komunikować za pomocą interfejsów równoległych bądź interfejsów szeregowych (I2C, SPI). Wykorzystany został interfejs szregowy SPI.
+
+Układ wyświetlacza podłączony jest do mikrokontrolera za pomocą pięciu linii:
+\begin{itemize}
+    \item sygnał sterujący zasilaniem (do portu GPIO) - ustawienie go w stan wysoki powoduje włączenie zasilania wyświetlacza, ustawienie w stan niski wyłączenie zasilania
+    \item sygnał D/C (do portu GPIO) - decyduje, czy bajty wysyłane do sterownika mają być zinterpretowane jako dane, które trzeba wpisać do pamięci czy jako komendy
+    \item sygnał CS (do portu GPIO) - kiedy jest w stanie niskim sterownik odbiera dane przez SPI, w stanie wysokim interfejs jest bezczynny
+    \item SPI-SCK (do interfejsu SPI) - sygnał synchronizujący transmisję, generowany przez mikrokontroler pełniący rolę master w tym połączeniu
+    \item SPI-MOSI (do interfejsu SPI) - wyjście urządzenia master (mikrokontrolera) i wejście urządzenia slave (sterownika wyświetlacza), przenosi dane
+\end{itemize}
+
+Szczegółowa konfiguracja GPIO i SPI, niezbędna do zapewnienia poprawnej komunikacji ze sterownikiem wyświetlacza OLED została opisana w \ref{gpio} oraz \ref{spi}.
+
+Sterownik może interpretować odebrane bajty jako komendy lub jako dane, w zależności od stanu sygnału D/C.
+
+Sterownik przechowuje w pamięci stan pikseli (zapalony/zgaszony) całego wyświetlacza (128 x 64). Ponieważ aby zakodować jeden piksel potrzebny jest jeden bit informacji, cały bufor zajmuje $\frac{128 \cdot 64}{8}=1536$ bajtów. Wiersze wyświetlacza są pogrupowane po 8 tworząc strony i tak cały wyświetlacz składa się z 8 stron po 128 kolumn. Każda kolumna na stronie jest reprezentowana jednym bajtem. Aby ustawić stan danego piksela należy ustawić jeden bit pod odpowiednim adresem.
+
+Wymiary wykorzystywanego wyświetlacza to w rzeczywistości 64 wiersze i tylko 96 kolumn, jednak sterownik jest dostosowany do pracy z kilkoma różnymi wyświetlaczami OLED. Numer pierwszej widocznej na ekranie kolumny jest w pamięci sterownika równy 18 i takie przesunięcie należy wykorzystywać przy adresowaniu.
+
+Sterownik umożliwia kilka różnych trybów adresowania, wykorzystany jest tryb stronicowy. Adresowanie strony x i kolumny y jest przeprowadzone w następujący sposób:
+\begin{enumerate}
+    \item Za pomocą komendy (0xb0 + x) wybierany jest numer strony
+    \item za pomocą komend (0x00 + $y_l$) i (0x10 + $y_h$) wybierany jest numer kolumny, gdzie $y_l$ i $y_h$ to odpowiedni młodsze 4 bity i starsze 4 bity numeru kolumny
+\end{enumerate}
+
+Po wybraniu numeru strony można wysyłać bajty w trybie pisania do pamięci i w ten sposób ustawiać wartości poszczególnych bitów, które odpowiadają pikselom na wyświetlaczu. Po wysłani jednego bajta danych numer kolumny jest zwiększany o jeden aż do osiągnięcia największej możliwej wartości, kiedy to nie ulega już zmianie do momentu jawnego ustawienia za pomocą komendy.

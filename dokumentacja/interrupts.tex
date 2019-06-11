@@ -1,0 +1,13 @@
+\subsection{Obsługa przerwań}
+Przerwania są podstawowym mechanizmem występującym w każdym procesorze. Ogólna zasada działania jest taka, że w pamięci procesora przechowywany jest wektor przerwań, czyli tablica odwzorowująca numery przerwań na adresy funkcji, zwanych procedurami obsługi przerwań. Kiedy dojdzie do pewnych zdarzeń w urządzeniu, może zostać wygenerowane przerwanie. Główny wątek programu zostaje przerwany i następuje skok do procedury obsługi danego przerwania (każde ma swój numer), której to adres jest uprzednio odczytywany ze wspomnianego wcześniej wektora przerwań. Programista może napisać swoje własne procedury obsługi przerwań i umieścić ich adresy w tym wektorze. W przypadku wykorzystywanego układu istnieje także możliwość nadawać priorytety poszczególnym przerwaniom. Przerwania mogą być także generowane programowo.
+
+W stworzonym programie wykorzystywane są tylko 2 z 35 dostępnych w mikrokontrolerze przerwań. Pierwsze z nich jest przerwaniem ADC, do którego dochodzi po zakończeniu pomiaru (patrz \ref{adc}). Drugie przerwanie jest generowane kiedy dojdzie do zdarzenia Compare Match 1 w Timer 1 (patrz \ref{timer}). Aby przerwanie było generowane musi być ono odblokowane w dwóch miejscach:
+\begin{itemize}
+    \item rejestry kontrolne danego urządzenia peryferyjnego odpowiedzialnego za generowanie przerwania
+    \item rejestry systemowego kontrolera przerwań (NVIC)
+\end{itemize}
+Konfiguracja rejestrów ADC i Timer 1 zostały opisane w \ref{timer} i \ref{adc}. Aby odblokować wykorzystywane przerwania w NVIC'u wykonane zostały następujące kroki:
+\begin{enumerate}
+    \item ustawienie bitu 2 rejestru ISER0 aby włączyć przerwania Timera 1
+    \item ustawienie bitu 22 rejestru ISER0 aby włączyć przerwania ADC
+\end{enumerate}
