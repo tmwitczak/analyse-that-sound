@@ -1,0 +1,25 @@
+\subsection{SSP}
+
+\subsubsection{Opis funkcjonalności}
+
+    Kontroler synchronicznego portu szeregowego zdolny do operacji
+    na SPI.
+
+\subsubsection{Konfiguracja}
+
+    Konfigurację SPI rozpoczynamy od ustawiania pinów.
+    Piny P0.7, P0.8, P0.9 ustawiamy kolejno na funkcje SCK1,
+    MISO1 i MOSI1 poprzez pisanie wartości 2 do rejestru
+    PINSEL0 dla bitów (kolejno dla pinów) 15:14, 17:16
+    i 19:18. Analogicznie ustawiamy wartości 0 do rejestru
+    PINMODE0 i wartości 0 do PINMODE0_OD. Następnie dla P2.2
+    ustawiamy funkcję pinu GPIO i analogicznie MODE i 'open drain'
+    jak wyżej.
+
+    Ustawiamy zasilanie urządzenia poprzez wpisanie wartości 1
+    do bitu 10 rejestru PCONP.
+
+    Potem ustawiamy częstotliwość zegara dla SSP1 równą 1 MHz
+    poprzez.... 
+
+    Następnie piszemy do rejestru CR0 od SSP1
