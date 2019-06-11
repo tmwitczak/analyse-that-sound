@@ -1,25 +1,16 @@
-\subsection{SSP}
+\subsection{SSP} \label{ssp}
+SSP jest kontrolerem synchronicznego portu szeregowego, który między innymi może operować na SPI. Wykorzystywane w projekcie urządzenie posiada dwa takie interfejsy (SSP0 i SSP1). Każdy z nich posiada swoje własne rejestry (CR0, CR1, ...) Interfejs SSP1 jest wykorzystywany do komunikacji z wyświetlaczem OLED (patrz \ref{oled}). Konfiguracja przebiega w następujący sposób:
+\begin{enumerate}
+    \item Podłączenie pinów P0.7, P0.8 i P0.9 do wyjść SCK1, MISO1 i MOSI1 interfejsu SSP1 poprzez wpisanie wartości 2 do rejestru PINSEL0, do par bitów 14:15, 16:17 i 18:19
+    \item Włączenie zasilania dla SSP1 poprzez ustawienie bitu 10 rejestru PCONP
+    \item Ustawienie polaryzacji sygnału zegarowego SCK na wysoką poprzez ustawienie bitu 6 (CPOL) rejestru CR0
+    \item Ustawienie czytania na rosnącym zboczu sygnału zegarowego poprzez wyzerowanie bitu 7 (CPHA) rejestru CR0
+    \item Ustawienie preskalera tak, aby częstotliwość SCK była równa ok 1 MHz, poprzez wpisanie obliczonej wartości do bitów 8:15 (SCR) rejestru CR0
+    \item Ustawienie liczby bitów tworzących bajt (ramkę) danych na 8 poprzez wpisanie wartości 7 do bitów 0:3 (DSS) rejestru CR0
+    \item Ustawienie formatu ramki na format SPI poprzez wyzerowanie bitów 5 i 4 (FRF) rejestru CR0
+    \item Wybranie trybu pracy 'master' poprzez wyzerowanie bitu 3 (MS) rejestru CR1
+    \item Uruchomienie interfejsu poprzez ustawienie bitu 1 (SSE) rejestru CR1
+\end{enumerate}
+Po skonfigurowaniu i uruchomieniu interfejsu można pisać lub odczytywać dane. SSP posiada kolejkę FIFO zarówno dla danych wysyłanych jak i dla danych odczytywanych. Aby dodać kolejny bajt do kolejki (zostanie nadany kiedy tylko będzie możliwe) należy wpisać wartość do rejestru DR. Aby odczytać odebrany bajt należy odczytać zawartość rejestru DR.
 
-\subsubsection{Opis funkcjonalności}
-
-    Kontroler synchronicznego portu szeregowego zdolny do operacji
-    na SPI.
-
-\subsubsection{Konfiguracja}
-
-    Konfigurację SPI rozpoczynamy od ustawiania pinów.
-    Piny P0.7, P0.8, P0.9 ustawiamy kolejno na funkcje SCK1,
-    MISO1 i MOSI1 poprzez pisanie wartości 2 do rejestru
-    PINSEL0 dla bitów (kolejno dla pinów) 15:14, 17:16
-    i 19:18. Analogicznie ustawiamy wartości 0 do rejestru
-    PINMODE0 i wartości 0 do PINMODE0_OD. Następnie dla P2.2
-    ustawiamy funkcję pinu GPIO i analogicznie MODE i 'open drain'
-    jak wyżej.
-
-    Ustawiamy zasilanie urządzenia poprzez wpisanie wartości 1
-    do bitu 10 rejestru PCONP.
-
-    Potem ustawiamy częstotliwość zegara dla SSP1 równą 1 MHz
-    poprzez.... 
-
-    Następnie piszemy do rejestru CR0 od SSP1
+Opisana powyżej konfiguracja jest zdeterminowana sterownikiem zewnętrznego wyświetlacza OLED, który na stałe ma ustawione pewne parametry interfejsu SPI (polaryzacja, faza), do których mikrokontroler (master) musi się dostosować.
