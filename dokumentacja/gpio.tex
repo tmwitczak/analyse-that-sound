@@ -1,0 +1,41 @@
+\subsection{GPIO}
+
+\subsubsection{Opis funkcjonalności}
+
+    Wejście i wyjście ogólnego przeznaczenia, wykorzystywane do komunikacji
+    sprzętowej pomiędzy procesorem a urządzeniami peryferyjnymi, realizowane
+    fizycznie jako piny.
+
+\subsubsection{Zastosowanie}
+
+    \paragraph{Wzmacniacz dla głośnika}
+
+        W celu skorzystania z głośnika wymagane jest wcześniejsze włączenie
+        wzmacniacza. W tym celu należy najpierw ustawić kierunek wyjściowy
+        dla pinów P0.27, P0.28 i P2.13 poprzez ustawienie na wartość 1 bitów
+        27 i 28 rejestru FIO0DIR oraz bitu 13 rejestru FIO2DIR.
+
+        Następnie należy ustawić stan niski na wyżej wymienionych
+        skonfigurowanych pinach. Dokonujemy tego wpisując wartość 1 do bitów
+        27 i 28 rejestru FIO0CLR oraz bitu 13 rejestru FIO2DIR.
+
+    \paragraph{Joystick}
+
+        W celu konfiguracji pinów potrzebnych do obsługi joysticka, tj.
+        P0.15, P0.16, P0.17, P2.3, P2.4, ustawiamy ich kierunek wejściowy
+        poprzez wpisanie wartości 0 do bitów 15, 16 i 17 rejestru FIO0DIR oraz
+        bitów 3 i 4 rejestru FIO2DIR.
+
+        Aby odczytać wartość stanu joysticka, tzn. czy i w którą stronę został
+        przyciśnięty, należy odczytać zawartość bitu [Y] rejestru FIO[X]PIN dla
+        wspomnianych pinów P[X].[Y]. W przypadku wystąpienia na nim stanu
+        niskiego wiemy, że joystick został wciśnięty w tym określonym kierunku.
+        Kierunki i odpowiadające im piny definiujemy jako:
+        \begin{enumerate}
+            \item góra - P0.15
+            \item dół - P2.3
+            \item lewo - P0.16
+            \item prawo - P2.4
+            \item środek - P0.17
+        \end{enumerate}
+   
