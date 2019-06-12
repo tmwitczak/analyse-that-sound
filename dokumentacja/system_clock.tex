@@ -3,7 +3,7 @@
 Aby mikrokontroler mógł pracować musi być doprowadzony do niego jakiś sygnał zegarowy. Wykorzystywane w projekcie urządzenie ma dostępne trzy różne oscylatory:
 \begin{itemize}
     \item Main oscillator - zewnętrzny kwarc 12 MHz
-    \item Internal RC oscillator - wewnętrzny układ drgający
+    \item Internal RC oscillator - wewnętrzny układ drgający ok. 4 MHz
     \item RTC oscillator - zewnętrzny kwarc 32 kHz
 \end{itemize}
 Każdy z nich może być źródłem (clock source) dla urządzenia peryferyjnego PLL0 (Phase Locked Loop 0), które częstotliwość doprowadzonego sygnału dzieli i mnoży przez wybrane współczynniki dając możliwość zwiększenia i precyzyjnego dostosowania potrzebnej częstotliwości taktowania procesora. Ostatecznie sygnał generowany przez PLL0 jest dzielony przez ustawiony w rejestrze dzielnik (clock divider) i w ten sposób zostaje wygenerowany sygnał bezpośrednio taktujący mikrokontroler.

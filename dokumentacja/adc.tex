@@ -68,5 +68,6 @@
     odczytujemy wartość otrzymanej próbki dla kanału 0 z rejestru AD0DR0
     z bitów od 15 do 4 włącznie.
 
-    Aby zakończyć przerwanie odczytujemy zawartość rejestru AD0GDR.
+    Na koniec procedury obsługi przerwania odczytujemy zawartość rejestru AD0GDR,
+    jest to niezbędne aby flaga przerwania została wyzerowana.
     
